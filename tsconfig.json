@@ -1,5 +1,26 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": [
+        "./components/*"
+      ],
+      "@/styles/*": [
+        "./styles/*"
+      ],
+      "@/config/*": [
+        "./config/*"
+      ],
+      "@/context/*": [
+        "./context/*"
+      ],
+      "@/utils/*": [
+        "./utils/*"
+      ],
+      "@lib/*": [
+        "./lib/*"
+      ],
+    },
     "target": "es5",
     "lib": [
       "dom",
@@ -23,7 +44,8 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "config/index.js"
   ],
   "exclude": [
     "node_modules"
