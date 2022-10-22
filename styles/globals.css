@@ -2,3 +2,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-size: calc(15px + 0.5vw);
+  line-height: calc(22px + 0.6vw);
+}
+
+/* h1,
+h2,
+h3 {
+  margin: 0 0 calc(16px+ 1vw) 0;
+} */
