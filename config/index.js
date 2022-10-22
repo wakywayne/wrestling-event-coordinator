@@ -5,6 +5,7 @@ var config = {
         db: process.env.MONGODB_URI
     },
     production: {
+        apiUrl: "",
         db: process.env.MONGODB_URI
     }
 };
