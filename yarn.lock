@@ -961,6 +961,16 @@
   resolved "https://registry.yarnpkg.com/@pothos/core/-/core-3.22.8.tgz#2afa2edae3755ef95c06a3c3c3a688b0225fefb5"
   integrity sha512-kij/rlEx2uphk4NFVhlrVI8g8fbFE32JxgYF5UVqHG32SfcanDW8jDOlE4PW89/p5L4Mg8cSkPzauTMYVtlq6A==
 
+"@pothos/plugin-scope-auth@^3.15.2":
+  version "3.15.2"
+  resolved "https://registry.yarnpkg.com/@pothos/plugin-scope-auth/-/plugin-scope-auth-3.15.2.tgz#82e485244e418ecc2c707bfb3e528272e8b03748"
+  integrity sha512-IspxzET32XZDEYKbh5fB0awxbeLA3u3j3VYnkEIdBZZLC/mWfhxNEE0ZgE7ybXBcGIivcQyGGDuM7OAeJ0dikA==
+
+"@pothos/plugin-with-input@^3.9.6":
+  version "3.9.6"
+  resolved "https://registry.yarnpkg.com/@pothos/plugin-with-input/-/plugin-with-input-3.9.6.tgz#6f806739d6d38d23f1a35a3e77dbe6441cd6fbd1"
+  integrity sha512-DPMhOzAGYEa2qVqUeeIy/9h92aSfVEzorwmkIjhP5iJoSW7vVAjA40LqWEgp6xdv+ChFUUTPO+SmK083ZdG6Mw==
+
 "@repeaterjs/repeater@^3.0.4":
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/@repeaterjs/repeater/-/repeater-3.0.4.tgz#a04d63f4d1bf5540a41b01a921c9a7fddc3bd1ca"
