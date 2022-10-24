@@ -22,6 +22,9 @@
       ],
       "@gql": [
         "./gql/*"
+      ],
+      "@types": [
+        "./types/*"
       ]
     },
     "target": "es5",
