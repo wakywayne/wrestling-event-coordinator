@@ -2,7 +2,10 @@ import { createServer } from '@graphql-yoga/node'
 import SchemaBuilder from "@pothos/core"
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import WithInputPlugin from "@pothos/plugin-with-input"
-import { CartItem, Cart, Money } from 'gql';
+import { CartItem, Cart, Money, User } from 'gql';
+import axios from 'axios';
+import { development } from '@/config/index';
+import { ConnectionCheckOutFailedEvent } from 'mongodb';
 
 
 const CARTS = [
@@ -42,7 +45,25 @@ const CARTS = [
     }
 ]
 
+const fetchUser = async (url: string) => {
+    try {
+        const response = await axios(url);
+        const data = response.data;
+        return data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            console.log(error.response?.data);
+        } else {
+            console.log(error);
+        }
+    }
+}
+
 const builder = new SchemaBuilder<{
+    Context: {
+        currentUser: User;
+    }
+
     AuthScopes: {
         public: boolean,
         user: boolean,
@@ -56,9 +77,10 @@ const builder = new SchemaBuilder<{
     authScopes: async (context) => ({
         public: true,
         // eagerly evaluated scope
-        user: false,
-        // evaluated when used
-        admin: true
+        user: context.currentUser.id === '1',
+        // user: false,
+        // evaluated when used 
+        admin: false
         // scope loader with argument
     }),
     withInput: {
@@ -71,6 +93,18 @@ const builder = new SchemaBuilder<{
     },
 });
 
+
+
+
+
+builder.objectType(User, {
+    name: 'User',
+    fields: (t) => ({
+        id: t.exposeID('id', {}),
+        name: t.exposeString('name', {}),
+        email: t.exposeString('email', {}),
+    }),
+});
 
 
 
@@ -140,6 +174,9 @@ builder.objectType(Money, {
 builder.queryType({
     fields: (t) => ({
         cart: t.field({
+            authScopes: {
+                user: true,
+            },
             type: Cart,
             nullable: true,
             args: {
@@ -158,6 +195,13 @@ builder.queryType({
         carts: t.field({
             type: [Cart],
             resolve: () => CARTS
+        }),
+        currentUser: t.field({
+            type: User,
+            resolve: (root, args, context) => {
+                console.log({ theContext: context.currentUser });
+                return context.currentUser;
+            }
         }),
     }),
 })
@@ -194,9 +238,21 @@ builder.mutationType({
 })
 
 
+
+
+
 const server = createServer({
     endpoint: '/api',
     schema: builder.toSchema(),
+    context: async ({ req }) => {
+
+        const user = await fetchUser(`${development.apiUrl}/api/auth/return/${req.headers.user}`);
+        const parsedUser = JSON.parse(user);
+
+        return {
+            currentUser: parsedUser.currentUser
+        }
+    }
 })
 
 
