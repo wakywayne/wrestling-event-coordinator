@@ -78,6 +78,7 @@ const builder = new SchemaBuilder<{
         public: true,
         // eagerly evaluated scope
         user: context.currentUser.id === '1',
+        // user: context.currentUser ? context.currentUser.id === '1' : false,
         // user: false,
         // evaluated when used 
         admin: false
@@ -246,11 +247,15 @@ const server = createServer({
     schema: builder.toSchema(),
     context: async ({ req }) => {
 
-        const user = await fetchUser(`${development.apiUrl}/api/auth/return/${req.headers.user}`);
-        const parsedUser = JSON.parse(user);
+        if (req.headers.user) {
+            const user = await fetchUser(`${development.apiUrl}/api/auth/return/${req.headers.user}`);
+            const parsedUser = JSON.parse(user);
 
-        return {
-            currentUser: parsedUser.currentUser
+            return {
+                currentUser: parsedUser.currentUser
+            }
+        } else {
+            null
         }
     }
 })
