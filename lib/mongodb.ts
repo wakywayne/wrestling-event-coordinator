@@ -1,11 +1,11 @@
 import { MongoClient } from 'mongodb'
-import { production } from 'config/index'
+import { db } from 'config/index'
 
-if (!production.db) {
+if (!db) {
     throw new Error('Invalid environment variable: "MONGODB_URI"')
 }
 
-const uri = production.db
+const uri = db
 const options = {
     // useNewUrlParser: true,
     // useUnifiedTopology: true,
@@ -14,7 +14,7 @@ const options = {
 let client
 let clientPromise: Promise<MongoClient>
 
-if (!production.db) {
+if (!db) {
     throw new Error('Please add your Mongo URI to .env.local')
 }
 

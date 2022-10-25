@@ -4,7 +4,7 @@ import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import WithInputPlugin from "@pothos/plugin-with-input"
 import { CartItem, Cart, Money, User } from 'gql';
 import axios from 'axios';
-import { development } from '@/config/index';
+import { apiUrl } from '@/config/index';
 import { ConnectionCheckOutFailedEvent } from 'mongodb';
 
 
@@ -248,7 +248,7 @@ const server = createServer({
     context: async ({ req }) => {
 
         if (req.headers.user) {
-            const user = await fetchUser(`${development.apiUrl}/api/auth/return/${req.headers.user}`);
+            const user = await fetchUser(`${apiUrl}/api/auth/return/${req.headers.user}`);
             const parsedUser = JSON.parse(user);
 
             return {
