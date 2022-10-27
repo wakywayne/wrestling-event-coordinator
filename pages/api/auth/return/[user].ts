@@ -12,7 +12,10 @@ const handler = async (req: overRideRequest, res: NextApiResponse) => {
     let { user } = req.query;
 
 
+    // let objJsonB64 = Buffer.from(JSON.stringify(SMilePlease)).toString("base64");
+
     let newObj = Buffer.from(user, 'base64').toString()
+    console.log({ newObj });
     res.status(200).json(newObj);
 }
 

@@ -45,6 +45,8 @@ const CARTS = [
     }
 ]
 
+
+
 const fetchUser = async (url: string) => {
     try {
         const response = await axios(url);
@@ -59,9 +61,13 @@ const fetchUser = async (url: string) => {
     }
 }
 
+interface newUser extends User {
+    poop: string;
+}
+
 const builder = new SchemaBuilder<{
     Context: {
-        currentUser: User;
+        currentUser: newUser;
     }
 
     AuthScopes: {
@@ -77,7 +83,7 @@ const builder = new SchemaBuilder<{
     authScopes: async (context) => ({
         public: true,
         // eagerly evaluated scope
-        user: context.currentUser.id === '1',
+        user: context.currentUser.poop === '1',
         // user: context.currentUser ? context.currentUser.id === '1' : false,
         // user: false,
         // evaluated when used 
@@ -85,6 +91,7 @@ const builder = new SchemaBuilder<{
         // scope loader with argument
     }),
     withInput: {
+        // Go over this
         typeOptions: {
             // default options for Input object types created by this plugin
         },
@@ -175,9 +182,9 @@ builder.objectType(Money, {
 builder.queryType({
     fields: (t) => ({
         cart: t.field({
-            authScopes: {
-                user: true,
-            },
+            // authScopes: {
+            //     user: true,
+            // },
             type: Cart,
             nullable: true,
             args: {
@@ -250,9 +257,10 @@ const server = createServer({
         if (req.headers.user) {
             const user = await fetchUser(`${apiUrl}/api/auth/return/${req.headers.user}`);
             const parsedUser = JSON.parse(user);
+            console.log({ parsedUser });
 
             return {
-                currentUser: parsedUser.currentUser
+                currentUser: parsedUser
             }
         } else {
             null
