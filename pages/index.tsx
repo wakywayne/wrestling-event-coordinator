@@ -9,22 +9,25 @@ import React from 'react';
 
 const Home: NextPage = () => {
 
-  const client = new ApolloClient({
-    uri: `${apiUrl}/api`,
-    cache: new InMemoryCache(),
+  const cache = new InMemoryCache({
+    typePolicies: {
+      Mutation: {
+        fields: {
+          addItem: {
+            merge(existing, incoming) {
+              return incoming;
+            }
+          }
+        }
+      }
+    }
   });
 
-  //   client.query({
-  //     query: gql`
-  //     query {
-  //       carts{
-  // id
-  // items{
-  //   name
-  // }
-  //     }
-  //     }`
-  //   }).then(result => console.log(result.data));
+  const client = new ApolloClient({
+    uri: `${apiUrl}/api`,
+    cache
+  });
+
 
 
   return (
