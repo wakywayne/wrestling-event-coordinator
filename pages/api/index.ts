@@ -1,13 +1,17 @@
-import { createServer } from '@graphql-yoga/node'
+import { createServer } from '@graphql-yoga/node';
 import { ObjectId } from 'bson';
-import SchemaBuilder from "@pothos/core"
+import { DateTimeResolver, ObjectIDResolver } from 'graphql-scalars';
+import SchemaBuilder, { initContextCache } from "@pothos/core"
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import WithInputPlugin from "@pothos/plugin-with-input"
-import { User, createdEvents, userSignUp } from 'gql';
+import {
+    User, createdEvents, userSignedUpEvents, weightsForUserCreatedEvents,
+    Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant
+} from 'gql';
 import axios from 'axios';
 import { apiUrl } from '@/config/index';
-
-
+import dbQueries from '@lib/queries';
+import dbMutations from '@lib/mutations';
 
 
 const fetchUser = async (url: string) => {
@@ -35,6 +39,17 @@ const builder = new SchemaBuilder<{
         public: boolean,
         user: boolean,
         admin: boolean,
+    };
+
+    Scalars: {
+        Date: {
+            Input: Date;
+            Output: Date;
+        };
+        mongoId: {
+            Input: ObjectId;
+            Output: ObjectId;
+        };
     };
 
     DefaultFieldNullability: true;
@@ -70,6 +85,11 @@ const builder = new SchemaBuilder<{
 
 
 
+// Custom Scalars 
+
+builder.addScalarType('mongoId', ObjectIDResolver, {});
+builder.addScalarType('Date', DateTimeResolver, {});
+
 
 
 builder.objectType(User, {
@@ -77,8 +97,10 @@ builder.objectType(User, {
 
     fields: (t) => ({
         _id: t.field({
-            type: ObjectId,
-            nullable: false,
+            // type: 'String',
+            type: 'mongoId',
+            // nullable: false,
+            // When we create a user it will expect an id if this is not nullable
             resolve: (user) => user._id
         }),
         name: t.exposeString('name', { nullable: false }),
@@ -96,7 +118,7 @@ builder.objectType(User, {
             }
         }),
         signedUpEvents: t.field({
-            type: [userSignUp],
+            type: [userSignedUpEvents],
             resolve: (parent, args, context) => {
 
                 if (!Array.isArray(parent.signedUpEvents) || !parent.signedUpEvents.length) {
@@ -106,6 +128,229 @@ builder.objectType(User, {
                 }
             }
         })
+    })
+})
+
+
+
+
+
+builder.objectType(createdEvents, {
+    name: 'createdEvents',
+    fields: (t) => ({
+        createdEventId: t.field({
+            // type: 'String',
+            type: 'mongoId',
+            nullable: false,
+            resolve: (createdEvents) => createdEvents.createdEventId
+        }),
+        eventName: t.exposeString('createdEventName', { nullable: false }),
+        createdEventDate: t.field({
+            type: 'Date',
+            nullable: false,
+            resolve: (createdEvents) => createdEvents.createdEventDate
+        }),
+        createdEventDescription: t.exposeString('createdEventDescription', { nullable: false }),
+        createdEventViewedApplicants: t.exposeBoolean('createdEventViewedApplicants', { nullable: false }),
+        createdEventCost: t.exposeString('createdEventCost'),
+        createdEventLink: t.exposeString('createdEventLink'),
+        createdEventWeights: t.field({
+            type: [weightsForUserCreatedEvents],
+            resolve: (parent, args, context) => {
+                if (!Array.isArray(parent.createdEventWeights) || !parent.createdEventWeights.length) {
+                    return [];
+                } else {
+                    return parent.createdEventWeights;
+                }
+            }
+        }),
+    })
+})
+
+
+builder.objectType(weightsForUserCreatedEvents, {
+    name: 'weightsForUserCreatedEvents',
+    fields: (t) => ({
+        weight: t.exposeString('weight'),
+        // I might t want to make this a field type  and return an empty object if filled is an empty array
+        filled: t.exposeBooleanList('filled'),
+    })
+})
+
+
+builder.objectType(userSignedUpEvents, {
+    name: 'userSignedUpEvents',
+    fields: (t) => ({
+        signedUpEventId: t.field({
+            // type: 'String',
+            type: 'mongoId',
+            nullable: false,
+            resolve: (parent) => parent.eventId
+        }),
+        eventName: t.exposeString('eventName', { nullable: false }),
+        signedUpEventDate: t.field({
+            // type: Date,
+            type: 'Date',
+            nullable: false,
+            resolve: (parent) => parent.eventDate
+        }),
+        accepted: t.exposeBoolean('accepted', { nullable: false }),
+    })
+})
+
+
+
+
+
+
+builder.objectType(EventType, {
+    name: 'Event',
+    fields: (t) => ({
+        _id: t.field({
+            // type: 'String',
+            type: 'mongoId',
+            nullable: false,
+            resolve: (event) => event._id
+        }),
+        eventName: t.exposeString('name', { nullable: false }),
+        eventDate: t.field({
+            // type: Date,
+            type: 'Date',
+            nullable: false,
+            resolve: (event) => event.date
+        }),
+        eventDescription: t.exposeString('description', { nullable: false }),
+        eventCost: t.exposeString('cost'),
+        eventLink: t.exposeString('eventLink'),
+        eventWeights: t.field({
+            type: [weightsForEvent],
+            resolve: (parent, args, context) => {
+                if (!Array.isArray(parent.weights) || !parent.weights.length) {
+                    return [];
+                } else {
+                    return parent.weights;
+                }
+            }
+
+        }),
+        eventApplicants: t.field({
+            type: [applicant],
+            resolve: (parent, args, context) => {
+                if (!Array.isArray(parent.eventApplicants) || !parent.eventApplicants.length) {
+                    return [];
+                } else {
+                    return parent.eventApplicants;
+                }
+            }
+        })
+    })
+})
+
+
+builder.objectType(applicant, {
+    name: 'applicant',
+    fields: (t) => ({
+        userId: t.field({
+            type: 'mongoId',
+            nullable: false,
+            resolve: (parent) => parent.userId
+        }),
+        name: t.exposeString('name', { nullable: false }),
+        weight: t.exposeInt('weight', { nullable: false }),
+    })
+})
+
+
+
+builder.objectType(spotsAvailableForEvent, {
+    name: 'spotsAvailableForEvent',
+    fields: (t) => ({
+        userId: t.field({
+            // type: 'String',
+            type: 'mongoId',
+            resolve: (parent) => parent.userId
+        }),
+        name: t.exposeString('name'),
+
+    })
+})
+
+
+
+builder.objectType(weightsForEvent, {
+    name: 'weightsForEvent',
+    fields: (t) => ({
+        weight: t.exposeInt('weight'),
+        spotsAvailable: t.field({
+            // type: spotsAvailableForEvent,
+            type: [spotsAvailableForEvent],
+            resolve: (parent, args, context) => {
+                if (!Array.isArray(parent.spotsAvailable) || !parent.spotsAvailable) {
+                    return [];
+                } else {
+                    return parent.spotsAvailable;
+                }
+            }
+        }),
+
+    })
+})
+
+
+
+
+
+
+builder.queryType({
+    fields: (t) => ({
+        // Get all users from exampleUsers
+        users: t.field({
+            type: [User],
+            resolve: async () => {
+                return await dbQueries.getUsers()
+            }
+        }),
+        events: t.field({
+            type: [EventType],
+            resolve: async () => {
+                return await dbQueries.getEvents()
+            }
+        }),
+    })
+})
+
+
+
+
+
+
+
+
+
+
+builder.mutationType({
+    fields: (t) => ({
+        // Create a new user
+        createUser: t.fieldWithInput({
+            input: {
+                name: t.input.string({ required: true }),
+                email: t.input.string({ required: true }),
+                password: t.input.string(),
+            },
+            type: 'mongoId',
+            resolve: async (parent, { input: { name, email, password } }, context) => {
+
+                if (password) {
+                    const user = await dbMutations.createUser({ name, email, password })
+                    console.log(user)
+                    return user;
+                } else {
+                    const user = await dbMutations.createUser({ name, email })
+                    console.log(user)
+                    return user;
+                }
+            }
+        }),
     })
 })
 

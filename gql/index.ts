@@ -1,50 +1,53 @@
 import { ObjectId } from 'bson';
 
-// interfaces for Users
-interface weightsForUserCreatedEvents {
-    weight: string;
-    filled: boolean[];
-}
 
-// export interface createdEvents {
-//     _id: ObjectId;
-//     eventName: string;
-//     eventDate: Date;
-//     eventDescription: string;
-//     cost?: string;
-//     eventLink?: string;
-//     weights?: weightsForUserCreatedEvents[];
-// }
+export class weightsForUserCreatedEvents {
+    weight?: string;
+    filled?: boolean[];
 
-export class createdEvents {
-    _id: ObjectId;
-    eventName: string;
-    eventDate: Date;
-    eventDescription: string;
-    cost?: string;
-    eventLink?: string;
-    weights?: weightsForUserCreatedEvents[];
 
-    constructor(_id: ObjectId, eventName: string, eventDate: Date, eventDescription: string, cost?: string, eventLink?: string, weights?: weightsForUserCreatedEvents[]) {
-        this._id = _id;
-        this.eventName = eventName;
-        this.eventDate = eventDate;
-        this.eventDescription = eventDescription;
-        this.cost = cost;
-        this.eventLink = eventLink;
-        this.weights = weights;
+    constructor(weight?: string, filled?: boolean[]) {
+        this.weight = weight;
+        this.filled = filled;
     }
 }
 
-// interface userSignUp {
-//     eventId: ObjectId;
-//     eventName: string;
-//     eventDate: Date;
-//     accepted: boolean;
-// }
 
-export class userSignUp {
+
+// @todo change these to start with created event in the database
+export class createdEvents {
+    createdEventId: ObjectId;
+    // createdEventId: string;
+    createdEventName: string;
+    createdEventDate: Date;
+    createdEventDescription: string;
+    createdEventViewedApplicants: boolean;
+    createdEventCost?: string;
+    createdEventLink?: string;
+    createdEventWeights?: weightsForUserCreatedEvents[];
+
+
+    constructor(createdEventId: ObjectId, createdEventName: string, createdEventDate: Date, createdEventDescription: string,
+        createdEventViewedApplicants: boolean, createdEventCost?: string, createdEventLink?: string,
+        createdEventWeights?: weightsForUserCreatedEvents[]) {
+
+        this.createdEventId = createdEventId;
+        this.createdEventName = createdEventName;
+        this.createdEventDate = createdEventDate;
+        this.createdEventDescription = createdEventDescription;
+        this.createdEventViewedApplicants = createdEventViewedApplicants;
+        this.createdEventCost = createdEventCost;
+        this.createdEventLink = createdEventLink;
+        this.createdEventWeights = createdEventWeights;
+    }
+
+}
+
+
+
+export class userSignedUpEvents {
     eventId: ObjectId;
+    // eventId: string;
     eventName: string;
     eventDate: Date;
     accepted: boolean;
@@ -59,18 +62,19 @@ export class userSignUp {
 }
 
 export class User {
-    _id: ObjectId;
+    _id?: ObjectId;
+    // _id: string;
     name: string;
     email: string;
     password?: string;
     availableWeights?: number[];
     createdEvents?: createdEvents[];
-    signedUpEvents?: userSignUp[];
+    signedUpEvents?: userSignedUpEvents[];
 
 
 
     constructor(id: ObjectId, name: string, email: string, password?: string, availableWeights?: number[],
-        createdEvents?: createdEvents[], signedUpEvents?: userSignUp[]) {
+        createdEvents?: createdEvents[], signedUpEvents?: userSignedUpEvents[]) {
         this._id = id;
         this.name = name;
         this.email = email;
@@ -81,35 +85,68 @@ export class User {
     }
 }
 
-// interfaces for Events
 
-interface spotsAvailableForEvent {
-    _id: ObjectId;
+
+export class spotsAvailableForEvent {
+    userId: ObjectId;
+    // userId: string;
     name: string;
+
+
+    constructor(userId: ObjectId, name: string) {
+        this.userId = userId;
+        this.name = name;
+    }
 }
 
-type spotsAvailableType = null | string | spotsAvailableForEvent
 
-interface weightsForEvent {
+export class applicant extends spotsAvailableForEvent {
     weight: number;
-    spotsAvailable: spotsAvailableType[] | Array<null>;
+
+
+    constructor(weight: number, userId: ObjectId, name: string) {
+        super(userId, name);
+        this.weight = weight;
+    }
 }
+
+
+export class weightsForEvent {
+    weight: number;
+    spotsAvailable: spotsAvailableForEvent[] | any[];
+
+    constructor(weight: number, spotsAvailable: spotsAvailableForEvent[] | any[]) {
+        this.weight = weight;
+        this.spotsAvailable = spotsAvailable;
+    }
+}
+
+// @todo you need to add an application section to the event object so we can notify a user if they have been accepted or not
+// we can set an object to local storage that has an array of events that they have been accepted to 
+// we can then map through that array and only display the events that and make sure there aren't any new events that 
+// they have been accepted to
 
 export class Event {
+    _id: ObjectId;
+    // _id: string;
     name: string;
     date: Date;
     description: string;
     cost?: string;
     eventLink?: string;
     weights?: weightsForEvent[];
+    eventApplicants?: applicant[] | undefined;
 
-    constructor(name: string, date: Date, description: string, cost?: string, eventLink?: string, weights?: weightsForEvent[]) {
+    constructor(_id: ObjectId, name: string, date: Date, description: string, cost?: string, eventLink?: string,
+        weights?: weightsForEvent[], eventApplicants?: applicant[] | undefined) {
+        this._id = _id;
         this.name = name;
         this.date = date;
         this.description = description;
         this.cost = cost;
         this.eventLink = eventLink;
         this.weights = weights;
+        this.eventApplicants = eventApplicants;
     }
 
 }
