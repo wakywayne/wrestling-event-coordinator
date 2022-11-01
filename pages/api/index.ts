@@ -1,4 +1,4 @@
-import { createServer } from '@graphql-yoga/node';
+import { createYoga } from 'graphql-yoga'
 import { ObjectId } from 'bson';
 import { DateTimeResolver, ObjectIDResolver } from 'graphql-scalars';
 import SchemaBuilder, { initContextCache } from "@pothos/core"
@@ -12,6 +12,8 @@ import axios from 'axios';
 import { apiUrl } from '@/config/index';
 import dbQueries from '@lib/queries';
 import dbMutations from '@lib/mutations';
+import { errorIfPromiseFalse } from 'utils';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 
 const fetchUser = async (url: string) => {
@@ -247,6 +249,7 @@ builder.objectType(EventType, {
 })
 
 
+
 builder.objectType(applicant, {
     name: 'applicant',
     fields: (t) => ({
@@ -301,19 +304,54 @@ builder.objectType(weightsForEvent, {
 
 
 
+
 builder.queryType({
     fields: (t) => ({
         // Get all users from exampleUsers
         users: t.field({
             type: [User],
             resolve: async () => {
-                return await dbQueries.getUsers()
+                try {
+                    return await errorIfPromiseFalse(dbQueries.getUsers(), 'No users found');
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+        }),
+        userById: t.field({
+            type: User,
+            args: {
+                id: t.arg({ type: 'mongoId', required: true })
+            },
+            resolve: async (parent, args, context) => {
+                try {
+                    return await errorIfPromiseFalse(dbQueries.getUserById(args.id), 'Error finding user by id')
+                } catch (err) {
+                    console.log(err)
+                }
             }
         }),
         events: t.field({
             type: [EventType],
             resolve: async () => {
-                return await dbQueries.getEvents()
+                try {
+                    return errorIfPromiseFalse(dbQueries.getEvents(), 'No events found')
+                } catch (err) {
+                    console.log(err)
+                }
+            }
+        }),
+        eventById: t.field({
+            type: EventType,
+            args: {
+                id: t.arg({ type: 'mongoId', required: true })
+            },
+            resolve: async (parent, args, context) => {
+                try {
+                    return errorIfPromiseFalse(dbQueries.getEventById(args.id), 'Error finding event by id')
+                } catch (err) {
+                    console.log(err)
+                }
             }
         }),
     })
@@ -354,27 +392,43 @@ builder.mutationType({
     })
 })
 
+const schema = builder.toSchema({})
 
-
-
-const server = createServer({
-    endpoint: '/api',
-    schema: builder.toSchema(),
-    context: async ({ req }) => {
-
-        if (req.headers.user) {
-            const user = await fetchUser(`${apiUrl}/api/auth/return/${req.headers.user}`);
-            const parsedUser = JSON.parse(user);
-            console.log({ parsedUser });
-
-            return {
-                currentUser: parsedUser
-            }
-        } else {
-            null
-        }
+export const config = {
+    api: {
+        // Disable body parsing (required for file uploads)
+        bodyParser: false
     }
+}
+
+export default createYoga<{
+    req: NextApiRequest
+    res: NextApiResponse
+}>({
+    // Needed to be defined explicitly because our endpoint lives at a different path other than `/graphql`
+    schema,
+    graphqlEndpoint: '/api'
 })
 
 
-export default server;
+// const server = createServer({
+//     endpoint: '/api/graphql',
+//     schema: schema,
+//     context: async ({ req }: any) => {
+
+//         if (req.headers.user) {
+//             const user = await fetchUser(`${apiUrl}/api/auth/return/${req.headers.user}`);
+//             const parsedUser = JSON.parse(user);
+//             console.log({ parsedUser });
+
+//             return {
+//                 currentUser: parsedUser
+//             }
+//         } else {
+//             null
+//         }
+//     }
+// })
+
+
+// export default server;
