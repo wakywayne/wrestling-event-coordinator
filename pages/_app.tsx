@@ -1,8 +1,16 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
+import { SessionProvider } from 'next-auth/react'
+import { Override } from 'types'
 
-function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+type NewAppProps = Override<AppProps, { pageProps: { session: any } }>
+
+function MyApp({ Component, pageProps: { session, ...pageProps } }: NewAppProps) {
+  return (
+    <SessionProvider session={session}>
+      <Component {...pageProps} />
+    </SessionProvider>
+  )
 }
 
 export default MyApp

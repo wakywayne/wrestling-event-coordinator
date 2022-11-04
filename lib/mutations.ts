@@ -7,7 +7,7 @@ const createUser = async (user: User): Promise<ObjectId | undefined> => {
 
     try {
         const client = await clientPromise;
-        const db = client.db("wrestling-event-planner");
+        const db = client.db();
 
         const newUser = await db
             .collection("users")

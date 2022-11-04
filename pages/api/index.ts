@@ -105,7 +105,7 @@ builder.objectType(User, {
             // When we create a user it will expect an id if this is not nullable
             resolve: (user) => user._id
         }),
-        name: t.exposeString('name', { nullable: false }),
+        name: t.exposeString('name'),
         email: t.exposeString('email', { nullable: false }),
         password: t.exposeString('password'),
         availableWeights: t.exposeIntList('availableWeights'),
@@ -369,24 +369,16 @@ builder.queryType({
 builder.mutationType({
     fields: (t) => ({
         // Create a new user
-        createUser: t.fieldWithInput({
-            input: {
-                name: t.input.string({ required: true }),
-                email: t.input.string({ required: true }),
-                password: t.input.string(),
+        createUser: t.field({
+            args: {
+                email: t.arg({ type: 'String', required: true }),
             },
             type: 'mongoId',
-            resolve: async (parent, { input: { name, email, password } }, context) => {
+            resolve: async (parent, { email }, context) => {
 
-                if (password) {
-                    const user = await dbMutations.createUser({ name, email, password })
-                    console.log(user)
-                    return user;
-                } else {
-                    const user = await dbMutations.createUser({ name, email })
-                    console.log(user)
-                    return user;
-                }
+                const user = await dbMutations.createUser({ email })
+                console.log(user)
+                return user;
             }
         }),
     })

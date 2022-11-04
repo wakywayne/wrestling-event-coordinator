@@ -64,7 +64,7 @@ export class userSignedUpEvents {
 export class User {
     _id?: ObjectId;
     // _id: string;
-    name: string;
+    name?: string;
     email: string;
     password?: string;
     availableWeights?: number[];
@@ -73,7 +73,7 @@ export class User {
 
 
 
-    constructor(id: ObjectId, name: string, email: string, password?: string, availableWeights?: number[],
+    constructor(email: string, id?: ObjectId, name?: string, password?: string, availableWeights?: number[],
         createdEvents?: createdEvents[], signedUpEvents?: userSignedUpEvents[]) {
         this._id = id;
         this.name = name;

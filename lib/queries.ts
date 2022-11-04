@@ -5,13 +5,11 @@ import clientPromise from 'lib/mongodb';
 const getUsers = async (): Promise<User[] | undefined> => {
     try {
         const client = await clientPromise;
-        const db = client.db("wrestling-event-planner");
 
-        const users = await db
-            .collection("users")
-            .find({}).limit(50)
-            .toArray();
 
+        const users = await client.db().collection("users").find({}).limit(50).toArray();
+
+        console.log(users)
 
         if (users) {
             return users as User[];
@@ -29,7 +27,7 @@ const getUserById = async (id: ObjectId): Promise<User | undefined> => {
         const mongId = new ObjectId(id);
 
         const client = await clientPromise;
-        const db = client.db("wrestling-event-planner");
+        const db = client.db();
 
         const user = await db
             .collection("users")
@@ -50,7 +48,7 @@ const getUserById = async (id: ObjectId): Promise<User | undefined> => {
 const getEvents = async (): Promise<Events[] | undefined> => {
     try {
         const client = await clientPromise;
-        const db = client.db("wrestling-event-planner");
+        const db = client.db();
 
         const events = await db
             .collection("events")
@@ -75,7 +73,7 @@ const getEventById = async (id: ObjectId): Promise<Events | undefined> => {
         const mongId = new ObjectId(id);
 
         const client = await clientPromise;
-        const db = client.db("wrestling-event-planner");
+        const db = client.db();
 
         const event = await db
             .collection("events")
