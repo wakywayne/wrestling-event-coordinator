@@ -27,7 +27,7 @@ const SignInForm: React.FC<Props> = () => {
         },
     ]
 
-    const handleSignIn = (e: MouseEvent) => {
+    const handleSignIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         signIn('email', { email, })
     }
@@ -54,7 +54,7 @@ const SignInForm: React.FC<Props> = () => {
                     <div className="flex items-center justify-between mb-3">
                         <button
                             className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline"
-                            type="button" onClick={(e) => console.log(e)}>
+                            type="button" onClick={(e) => { handleSignIn(e) }}>
                             Sign In
                         </button>
                         <a className="inline-block text-sm font-bold text-blue-500 align-baseline hover:text-blue-800"
@@ -66,7 +66,7 @@ const SignInForm: React.FC<Props> = () => {
                     <div className="grid grid-flow-row grid-row">
                         {providers.map(({ name, Icon }, index) => {
                             return (
-                                <div key={`${name} ${index}`} className='flex justify-start p-3 border rounded ' onClick={() => { handleAuthSignIn(name) }}>
+                                <div key={`${name} ${index}`} className='flex justify-start p-3 border rounded hover:cursor-pointer' onClick={() => { handleAuthSignIn(name) }}>
                                     <Icon className='m-3 ' />
                                     <p className='m-3 text-base '>Login with {name}</p>
                                 </div>)

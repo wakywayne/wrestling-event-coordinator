@@ -9,6 +9,7 @@ import {
     Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant
 } from 'gql';
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 import { apiUrl } from '@/config/index';
 import dbQueries from '@lib/queries';
 import dbMutations from '@lib/mutations';
@@ -398,9 +399,16 @@ export default createYoga<{
     res: NextApiResponse
 }>({
     // Needed to be defined explicitly because our endpoint lives at a different path other than `/graphql`
+    graphqlEndpoint: '/api',
     schema,
-    graphqlEndpoint: '/api'
-})
+    context: async ({ req }: any) => {
+        const session = await getSession({ req })
+        console.log(session);
+
+    },
+
+}
+)
 
 
 // const server = createServer({

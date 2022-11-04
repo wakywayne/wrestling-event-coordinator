@@ -14,6 +14,10 @@ var config = {
             id: process.env.GOOGLE_ID,
             secret: process.env.GOOGLE_SECRET,
         },
+        facebook: {
+            id: process.env.FACEBOOK_ID,
+            secret: process.env.FACEBOOK_SECRET,
+        },
     }
 };
 
