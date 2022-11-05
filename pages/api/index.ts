@@ -9,12 +9,14 @@ import {
     Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant
 } from 'gql';
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+// import { getSession } from 'next-auth/react';
+import { unstable_getServerSession } from "next-auth/next"
 import { apiUrl } from '@/config/index';
 import dbQueries from '@lib/queries';
 import dbMutations from '@lib/mutations';
 import { errorIfPromiseFalse } from 'utils';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { authOptions } from './auth/[...nextauth]';
 
 
 const fetchUser = async (url: string) => {
@@ -401,9 +403,9 @@ export default createYoga<{
     // Needed to be defined explicitly because our endpoint lives at a different path other than `/graphql`
     graphqlEndpoint: '/api',
     schema,
-    context: async ({ req }: any) => {
-        const session = await getSession({ req })
-        console.log(session);
+    context: async ({ req, res }: any) => {
+        const session = await unstable_getServerSession(req, res, authOptions)
+        console.log({ session });
 
     },
 

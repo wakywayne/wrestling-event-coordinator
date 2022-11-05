@@ -1,4 +1,4 @@
-import { signIn, useSession } from 'next-auth/react'
+import { signIn, useSession, signOut } from 'next-auth/react'
 import { useState, } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -27,15 +27,16 @@ const SignInForm: React.FC<Props> = () => {
         },
     ]
 
-    const handleSignIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const handleSignIn = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-        signIn('email', { email, })
+        await signIn('email', { email, })
+        // push(asPath)
     }
 
-    const handleAuthSignIn = (name: string) => {
+    const handleAuthSignIn = async (name: string) => {
         // make name all lowercase
         name = name.toLowerCase();
-        signIn(name)
+        await signIn(name)
     }
 
     if (!session) {
@@ -81,6 +82,7 @@ const SignInForm: React.FC<Props> = () => {
                 <Link href='/'><a>
                     <p className='text-xl text-center align-middle'>You are already signed in silly <span className='text-blue-500 hover:text-blue-800'>click to go Home</span></p>
                 </a></Link>
+                <div onClick={() => signOut({ callbackUrl: 'http://localhost:3000/auth/signin?callbackUrl=/' })}>Or sign out</div>
             </div>
         )
     }
