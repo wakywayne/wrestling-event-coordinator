@@ -14,9 +14,9 @@ import { unstable_getServerSession } from "next-auth/next"
 import { apiUrl } from '@/config/index';
 import dbQueries from '@lib/queries';
 import dbMutations from '@lib/mutations';
-import { errorIfPromiseFalse } from 'utils';
+import { errorIfPromiseFalse, cleanUndefinedOrNullKeys as keyCleaner } from 'utils';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authOptions } from './auth/[...nextauth]';
+import { authOptions, TheFinalSession } from './auth/[...nextauth]';
 
 
 const fetchUser = async (url: string) => {
@@ -43,7 +43,8 @@ const builder = new SchemaBuilder<{
     AuthScopes: {
         public: boolean,
         user: boolean,
-        admin: boolean,
+        // paidUser: boolean,
+        // admin: boolean,
     };
 
     Scalars: {
@@ -66,12 +67,14 @@ const builder = new SchemaBuilder<{
     ],
 
     authScopes: async (context) => ({
-        public: true,
+        public: context.currentUser === null,
         // eagerly evaluated scope
-        user: context.currentUser ? context.currentUser.name == 'test' : false,
+        user: context.currentUser !== null && context.currentUser !== undefined && context.currentUser.email !== null,
+        // user: context.currentUser!==null&&context.currentUser.paid===false,
         // user: false,
+        // paidUser: context.currentUser.paid===true,
         // evaluated when used 
-        admin: false
+        // admin: context.currentUser!==null&&context.currentUser.admin===true,
         // scope loader with argument
     }),
 
@@ -96,7 +99,7 @@ builder.addScalarType('mongoId', ObjectIDResolver, {});
 builder.addScalarType('Date', DateTimeResolver, {});
 
 
-
+// User object type
 builder.objectType(User, {
     name: 'User',
 
@@ -110,7 +113,6 @@ builder.objectType(User, {
         }),
         name: t.exposeString('name'),
         email: t.exposeString('email', { nullable: false }),
-        password: t.exposeString('password'),
         availableWeights: t.exposeIntList('availableWeights'),
         createdEvents: t.field({
             type: [createdEvents],
@@ -137,9 +139,7 @@ builder.objectType(User, {
 })
 
 
-
-
-
+// On the user type
 builder.objectType(createdEvents, {
     name: 'createdEvents',
     fields: (t) => ({
@@ -172,7 +172,7 @@ builder.objectType(createdEvents, {
     })
 })
 
-
+// On the user type
 builder.objectType(weightsForUserCreatedEvents, {
     name: 'weightsForUserCreatedEvents',
     fields: (t) => ({
@@ -182,7 +182,7 @@ builder.objectType(weightsForUserCreatedEvents, {
     })
 })
 
-
+// On the user type
 builder.objectType(userSignedUpEvents, {
     name: 'userSignedUpEvents',
     fields: (t) => ({
@@ -207,27 +207,33 @@ builder.objectType(userSignedUpEvents, {
 
 
 
-
+// Event object type
 builder.objectType(EventType, {
     name: 'Event',
     fields: (t) => ({
         _id: t.field({
             // type: 'String',
             type: 'mongoId',
-            nullable: false,
+            // nullable: false,
             resolve: (event) => event._id
         }),
-        eventName: t.exposeString('name', { nullable: false }),
-        eventDate: t.field({
+        createdBy: t.field({
+            type: 'mongoId',
+            nullable: false,
+            resolve: (event) => event.createdBy
+        }),
+        location: t.exposeFloatList('location'),
+        name: t.exposeString('name', { nullable: false }),
+        date: t.field({
             // type: Date,
             type: 'Date',
             nullable: false,
             resolve: (event) => event.date
         }),
-        eventDescription: t.exposeString('description', { nullable: false }),
-        eventCost: t.exposeString('cost'),
-        eventLink: t.exposeString('eventLink'),
-        eventWeights: t.field({
+        description: t.exposeString('description', { nullable: false }),
+        cost: t.exposeString('cost'),
+        link: t.exposeString('link'),
+        weights: t.field({
             type: [weightsForEvent],
             resolve: (parent, args, context) => {
                 if (!Array.isArray(parent.weights) || !parent.weights.length) {
@@ -251,38 +257,7 @@ builder.objectType(EventType, {
     })
 })
 
-
-
-builder.objectType(applicant, {
-    name: 'applicant',
-    fields: (t) => ({
-        userId: t.field({
-            type: 'mongoId',
-            nullable: false,
-            resolve: (parent) => parent.userId
-        }),
-        name: t.exposeString('name', { nullable: false }),
-        weight: t.exposeInt('weight', { nullable: false }),
-    })
-})
-
-
-
-builder.objectType(spotsAvailableForEvent, {
-    name: 'spotsAvailableForEvent',
-    fields: (t) => ({
-        userId: t.field({
-            // type: 'String',
-            type: 'mongoId',
-            resolve: (parent) => parent.userId
-        }),
-        name: t.exposeString('name'),
-
-    })
-})
-
-
-
+// On the event type
 builder.objectType(weightsForEvent, {
     name: 'weightsForEvent',
     fields: (t) => ({
@@ -302,12 +277,42 @@ builder.objectType(weightsForEvent, {
     })
 })
 
+// On the event type
+builder.objectType(applicant, {
+    name: 'applicant',
+    fields: (t) => ({
+        userId: t.field({
+            type: 'mongoId',
+            nullable: false,
+            resolve: (parent) => parent.userId
+        }),
+        name: t.exposeString('name', { nullable: false }),
+        weight: t.exposeInt('weight', { nullable: false }),
+    })
+})
+
+// On the event type
+builder.objectType(spotsAvailableForEvent, {
+    name: 'spotsAvailableForEvent',
+    fields: (t) => ({
+        userId: t.field({
+            // type: 'String',
+            type: 'mongoId',
+            resolve: (parent) => parent.userId
+        }),
+        name: t.exposeString('name'),
+
+    })
+})
 
 
 
 
 
 
+
+
+// This is our root query type
 builder.queryType({
     fields: (t) => ({
         // Get all users from exampleUsers
@@ -321,6 +326,7 @@ builder.queryType({
                 }
             }
         }),
+        // Get a user by id
         userById: t.field({
             type: User,
             args: {
@@ -334,6 +340,7 @@ builder.queryType({
                 }
             }
         }),
+        // Get all events 
         events: t.field({
             type: [EventType],
             resolve: async () => {
@@ -344,6 +351,7 @@ builder.queryType({
                 }
             }
         }),
+        // Get an event by id
         eventById: t.field({
             type: EventType,
             args: {
@@ -371,7 +379,7 @@ builder.queryType({
 
 builder.mutationType({
     fields: (t) => ({
-        // Create a new user
+        // Things all users can do
         createUser: t.field({
             args: {
                 email: t.arg({ type: 'String', required: true }),
@@ -382,6 +390,37 @@ builder.mutationType({
                 const user = await dbMutations.createUser({ email })
                 console.log(user)
                 return user;
+            }
+        }),
+
+        // Things only logged in users can do
+        createEvent: t.fieldWithInput({
+            input: {
+                createdBy: t.input.field({ type: 'mongoId', required: true }),
+                location: t.input.string({ required: true }),
+                name: t.input.string({ required: true }),
+                date: t.input.field({ type: 'Date', required: true }),
+                description: t.input.string({ required: true }),
+                cost: t.input.string(),
+                link: t.input.string(),
+                weights: t.input.string(),
+                eventApplicants: t.input.string(),
+            },
+            type: 'mongoId',
+            resolve: (_, { input: { createdBy, location, name, date, description, cost, link, weights, eventApplicants } }) => {
+
+
+                let anObject = {
+                    createdBy, location: JSON.parse(location), name, date, description,
+                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
+                    eventApplicants: eventApplicants && JSON.parse(eventApplicants)
+                }
+
+                // Typescript can't figure out the key since we manually build an object above
+                // @ts-ignore
+                const cleanObject: EventType = keyCleaner(anObject);
+
+                return dbMutations.createEvent(cleanObject);
             }
         }),
     })
@@ -403,10 +442,22 @@ export default createYoga<{
     // Needed to be defined explicitly because our endpoint lives at a different path other than `/graphql`
     graphqlEndpoint: '/api',
     schema,
-    context: async ({ req, res }: any) => {
-        const session = await unstable_getServerSession(req, res, authOptions)
-        console.log({ session });
+    context: async ({ req, res }: { req: NextApiRequest; res: NextApiResponse }) => {
+        // @ts-ignore
+        const session: TheFinalSession = await unstable_getServerSession(req, res, authOptions)
+        const jwt = require("jsonwebtoken");
 
+        if (session) {
+            if (session.jwt) {
+                const decodedToken = jwt.verify(session.jwt, process.env.JWT_SECRET);
+                const user = await dbQueries.getUserById(decodedToken.sub);
+                return { currentUser: user }
+            } else {
+                return { currentUser: null }
+            }
+        } else {
+            return { currentUser: null }
+        }
     },
 
 }

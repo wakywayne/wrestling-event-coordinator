@@ -7,6 +7,24 @@ import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
 import clientPromise from "@lib/mongodb";
 import { JWT } from "graphql-scalars/typings/mocks";
 
+interface JwtDecoded {
+    name?: string,
+    email: string,
+    picture?: string,
+    sub: string,
+    iat: number,
+}
+
+export interface TheFinalSession {
+    user: {
+        name?: string,
+        email: string,
+        image?: string
+    },
+    expires: string,
+    jwt: string
+}
+
 
 export const authOptions = {
     // Configure one or more authentication providers
@@ -48,12 +66,12 @@ export const authOptions = {
         secret: process.env.JWT_SECRET,
         maxAge: 30 * 24 * 60 * 60, // 30 days
 
-        async encode({ token, secret }: any) {
+        async encode({ token, secret }: { token: typeof JWT; secret: string }) {
             const jwt = require("jsonwebtoken");
             const encodedToken = jwt.sign(token, secret);
             return encodedToken;
         },
-        async decode({ token, secret }: any) {
+        async decode({ token, secret }: { token: typeof JWT; secret: string }) {
             const jwt = require("jsonwebtoken");
             const decodedToken = jwt.verify(token, secret);
             return decodedToken;
@@ -62,8 +80,8 @@ export const authOptions = {
 
     // This is for jwt stuff?
     callbacks: {
-        jwt: async ({ token, user }: any) => {
-            console.log({ jwt: token, user });
+        jwt: async ({ token, user }: { token: JwtDecoded; user: Object }) => {
+            // console.log({ jwt: token, user: Object });
             if (token.sub) {
                 return token
             } else {
@@ -71,15 +89,29 @@ export const authOptions = {
             }
 
         },
-        session: async ({ session, token }: any) => {
-            console.log({ session, token });
+        session: async ({ session, token }: { session: Omit<TheFinalSession, "jwt">; token: JwtDecoded }) => {
+            // console.log({ session, token });
             const jwt = require("jsonwebtoken");
             const safeJwt = jwt.sign(token, process.env.JWT_SECRET);
-            session.jwt = safeJwt;
-            console.log({ theSession: session })
-            return session
+
+            let finalSession = {}
+
+            if (token.sub) {
+                finalSession = {
+                    ...session,
+                    jwt: safeJwt,
+                }
+            } else {
+                finalSession = {
+                    ...session,
+                    jwt: "",
+                }
+            }
+            // console.log({ theSession: session })
+            return finalSession as TheFinalSession;
         },
     },
 }
 
+// @ts-ignore
 export default NextAuth(authOptions)

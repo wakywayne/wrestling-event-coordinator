@@ -62,23 +62,21 @@ export class userSignedUpEvents {
 }
 
 export class User {
-    _id?: ObjectId;
+    _id: ObjectId;
     // _id: string;
     name?: string;
     email: string;
-    password?: string;
     availableWeights?: number[];
     createdEvents?: createdEvents[];
     signedUpEvents?: userSignedUpEvents[];
 
 
 
-    constructor(email: string, id?: ObjectId, name?: string, password?: string, availableWeights?: number[],
+    constructor(email: string, id: ObjectId, name?: string, availableWeights?: number[],
         createdEvents?: createdEvents[], signedUpEvents?: userSignedUpEvents[]) {
         this._id = id;
         this.name = name;
         this.email = email;
-        this.password = password;
         this.availableWeights = availableWeights;
         this.createdEvents = createdEvents;
         this.signedUpEvents = signedUpEvents;
@@ -113,9 +111,10 @@ export class applicant extends spotsAvailableForEvent {
 
 export class weightsForEvent {
     weight: number;
-    spotsAvailable: spotsAvailableForEvent[] | any[];
+    // spotsAvailable: spotsAvailableForEvent[];
+    spotsAvailable: spotsAvailableForEvent[];
 
-    constructor(weight: number, spotsAvailable: spotsAvailableForEvent[] | any[]) {
+    constructor(weight: number, spotsAvailable: spotsAvailableForEvent[]) {
         this.weight = weight;
         this.spotsAvailable = spotsAvailable;
     }
@@ -126,25 +125,30 @@ export class weightsForEvent {
 // we can then map through that array and only display the events that and make sure there aren't any new events that 
 // they have been accepted to
 
+
+
 export class Event {
     _id: ObjectId;
-    // _id: string;
+    createdBy: ObjectId;
+    location: number[];
     name: string;
     date: Date;
     description: string;
     cost?: string;
-    eventLink?: string;
+    link?: string;
     weights?: weightsForEvent[];
     eventApplicants?: applicant[] | undefined;
 
-    constructor(_id: ObjectId, name: string, date: Date, description: string, cost?: string, eventLink?: string,
+    constructor(createdBy: ObjectId, location: number[], name: string, date: Date, description: string, _id: ObjectId, cost?: string, link?: string,
         weights?: weightsForEvent[], eventApplicants?: applicant[] | undefined) {
+        this.createdBy = createdBy;
         this._id = _id;
+        this.location = location;
         this.name = name;
         this.date = date;
         this.description = description;
         this.cost = cost;
-        this.eventLink = eventLink;
+        this.link = link;
         this.weights = weights;
         this.eventApplicants = eventApplicants;
     }
