@@ -403,7 +403,7 @@ builder.mutationType({
                 link: t.input.string(),
                 weights: t.input.string(),
             },
-            type: 'mongoId',
+            type: EventType,
             resolve: (_, { input: { location, name, date, description, cost, link, weights, } }, context) => {
 
 
@@ -415,6 +415,28 @@ builder.mutationType({
                 return dbMutations.createEvent(anObject);
             }
         }),
+        // updateEvent: t.fieldWithInput({
+        //     input: {
+        //         location: t.input.string(),
+        //         name: t.input.string(),
+        //         date: t.input.field({ type: 'Date' }),
+        //         description: t.input.string(),
+        //         cost: t.input.string(),
+        //         link: t.input.string(),
+        //         weights: t.input.string(),
+        //     },
+        //     type: 'mongoId',
+        //     resolve: (_, { input: { location, name, date, description, cost, link, weights, } }, context) => {
+
+
+        //         let anObject = {
+        //             createdBy: context.currentUser._id as ObjectId, location: location && JSON.parse(location), name, date, description,
+        //             cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
+        //         }
+
+        //         return dbMutations.createEvent(anObject);
+        //     }
+        // }),
         deleteEvent: t.field({
             args: {
                 id: t.arg({ type: 'mongoId', required: true })

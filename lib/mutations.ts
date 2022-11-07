@@ -1,5 +1,5 @@
 import { ObjectId } from 'bson';
-import { User, Event as Events, weightsForEvent, weightsForUserCreatedEvents, Event, createdEvents } from 'gql';
+import { User, Event as Events, weightsForEvent, weightsForUserCreatedEvents, createdEvents } from 'gql';
 import { cleanUndefinedOrNullKeys } from 'utils'
 import clientPromise from 'lib/mongodb';
 
@@ -27,7 +27,7 @@ const createUser = async (user: Omit<User, "_id">): Promise<ObjectId | undefined
 }
 
 // create a function that creates an event
-const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Promise<ObjectId | undefined> => {
+const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Promise<Events | undefined> => {
 
     const createdBy = event.createdBy
     const name = event.name
@@ -66,7 +66,7 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
 
 
     // Here we define our two functions so we can later await them consecutively
-    const insertEvent = async (event: Omit<Event, '_id'>) => {
+    const insertEvent = async () => {
         const client = await clientPromise;
         const db = client.db();
 
@@ -109,7 +109,7 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
     }
 
 
-    return insertEvent(cleanEvent).then((returnedId: ObjectId): ObjectId => {
+    const returnedEventId = await insertEvent().then((returnedId: ObjectId): ObjectId => {
 
         const eventWithoutId = {
             createdEventName: name,
@@ -154,6 +154,8 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
         return returnedId
     })
 
+    return { ...cleanEvent, _id: new ObjectId(returnedEventId) }
+
 }
 
 // create a function that deletes an event
@@ -162,25 +164,17 @@ const deleteEvent = async (eventId: ObjectId, userId: ObjectId) => {
         const client = await clientPromise;
         const db = client.db();
 
-        console.log({ eventId, userId })
+        const queries = await Promise.all([db.collection("events").deleteOne({ _id: new ObjectId(eventId) }), db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $pull: { createdEvents: { createdEventId: new ObjectId(eventId) } } })])
 
-        const deleteEvent = await db.collection("events").deleteOne({ _id: new ObjectId(eventId) })
 
-        const deleteUserCreatedEvent = await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $pull: { createdEvents: { createdEventId: new ObjectId(eventId) } } })
 
-        if (deleteEvent && deleteUserCreatedEvent) {
+        if (queries[0].acknowledged == true && queries[1].acknowledged == true) {
             return true
         } else {
             throw new Error("Event not deleted")
         }
 
-        // Promise.all([
-        //     db.collection("events").deleteOne({ _id: eventId }),
-        //     db.collection("users").updateOne({ _id: userId }, { createdEvents: { $pull: { createdEventId: eventId } } })
-        //     // 
-        // ]).then((arrayReturn) => {
-        //     console.log(arrayReturn)
-        // })
+
     } catch (e) {
         console.error(e);
     }
