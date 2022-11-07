@@ -184,7 +184,7 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
 
 
         // this function updates the corresponding event in the users createdEvents array
-        const updateUserCreatedEvent = async (event: Partial<createdEvents>, userId: ObjectId) => {
+        const updateUserCreatedEvent = async (event: createdEvents, userId: ObjectId) => {
             const client = await clientPromise;
             const db = client.db();
 
@@ -213,7 +213,7 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
         }
 
         // we redue the process we did earlier
-        const cleanEventWithId = cleanUndefinedOrNullKeys<Events>(eventWithId)
+        const cleanEventWithId = cleanUndefinedOrNullKeys<createdEvents>(eventWithId)
 
 
         const eventWeights: weightsForEvent[] | undefined = event.weights
@@ -239,10 +239,10 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
             })
 
             // insert new document into user's createdEvents field
-            updateUserCreatedEvent({ ...cleanEventObjectWithoutId, createdEventWeights: newEventWeights }, createdBy)
+            updateUserCreatedEvent({ ...cleanEventWithId, createdEventWeights: newEventWeights }, createdBy)
         } else {
             const newEventWeights: weightsForUserCreatedEvents[] = []
-            updateUserCreatedEvent({ ...cleanEventObjectWithoutId, createdEventWeights: newEventWeights }, createdBy)
+            updateUserCreatedEvent({ ...cleanEventWithId, createdEventWeights: newEventWeights }, createdBy)
         }
 
 
