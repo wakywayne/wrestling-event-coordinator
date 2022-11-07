@@ -188,17 +188,24 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
             const client = await clientPromise;
             const db = client.db();
 
+            const eventWithConfirmedProperId: createdEvents = {
+                ...event,
+                createdEventId: new ObjectId(event.createdEventId)
+            }
 
+            console.log({ eventWithConfirmedProperId, userId })
 
             const newEvent = await db
                 .collection("users")
-                .updateOne({ _id: new ObjectId(userId) }, { $set: { createdEvents: event } });
+                .updateOne({ _id: new ObjectId(userId), "createdEvents.createdEventId": new ObjectId(_id) }, { $set: { "createdEvents.$": eventWithConfirmedProperId } });
             // return the created event's id
+            // db.users.updateOne({_id: ObjectId("63669a7fadb92eac2df57fc9"), "createdEvents.createdEventId": ObjectId('636877a65c6d7c7c098baf5b')}, 
+            // {$set: {"createdEvents.$":{name: "penis"}}})
 
             if (newEvent) {
-                return true
+                return
             } else {
-                throw new Error("Event not created");
+                throw new Error("User Event not created");
             }
         }
 
