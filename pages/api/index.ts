@@ -415,28 +415,29 @@ builder.mutationType({
                 return dbMutations.createEvent(anObject);
             }
         }),
-        // updateEvent: t.fieldWithInput({
-        //     input: {
-        //         location: t.input.string(),
-        //         name: t.input.string(),
-        //         date: t.input.field({ type: 'Date' }),
-        //         description: t.input.string(),
-        //         cost: t.input.string(),
-        //         link: t.input.string(),
-        //         weights: t.input.string(),
-        //     },
-        //     type: 'mongoId',
-        //     resolve: (_, { input: { location, name, date, description, cost, link, weights, } }, context) => {
+        updateEvent: t.fieldWithInput({
+            input: {
+                _id: t.input.field({ type: 'mongoId', required: true }),
+                location: t.input.string({ required: true }),
+                name: t.input.string({ required: true }),
+                date: t.input.field({ type: 'Date', required: true }),
+                description: t.input.string({ required: true }),
+                cost: t.input.string(),
+                link: t.input.string(),
+                weights: t.input.string(),
+            },
+            type: EventType,
+            resolve: (_, { input: { _id, location, name, date, description, cost, link, weights, } }, context) => {
 
 
-        //         let anObject = {
-        //             createdBy: context.currentUser._id as ObjectId, location: location && JSON.parse(location), name, date, description,
-        //             cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
-        //         }
+                let anObject = {
+                    _id: _id as ObjectId, location: location && JSON.parse(location), name, date, description,
+                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
+                }
 
-        //         return dbMutations.createEvent(anObject);
-        //     }
-        // }),
+                return dbMutations.updateEvent(context.currentUser._id, anObject);
+            }
+        }),
         deleteEvent: t.field({
             args: {
                 id: t.arg({ type: 'mongoId', required: true })
@@ -490,25 +491,3 @@ export default createYoga<{
 }
 )
 
-
-// const server = createServer({
-//     endpoint: '/api/graphql',
-//     schema: schema,
-//     context: async ({ req }: any) => {
-
-//         if (req.headers.user) {
-//             const user = await fetchUser(`${apiUrl}/api/auth/return/${req.headers.user}`);
-//             const parsedUser = JSON.parse(user);
-//             console.log({ parsedUser });
-
-//             return {
-//                 currentUser: parsedUser
-//             }
-//         } else {
-//             null
-//         }
-//     }
-// })
-
-
-// export default server;

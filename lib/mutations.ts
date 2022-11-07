@@ -54,7 +54,7 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
 
 
     // cleaning
-    const cleanEventWithoutEventApplicants = cleanUndefinedOrNullKeys(dirtyEventWithoutEventApplicants)
+    const cleanEventWithoutEventApplicants = cleanUndefinedOrNullKeys<Omit<Events, "_id" | "eventApplicants">>(dirtyEventWithoutEventApplicants)
 
     const cleanEvent = {
         ...cleanEventWithoutEventApplicants as Omit<Events, "_id">,
@@ -120,7 +120,7 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
         }
 
         // we redue the process we did earlier
-        const cleanEventWithoutId = cleanUndefinedOrNullKeys(eventWithoutId)
+        const cleanEventWithoutId = cleanUndefinedOrNullKeys<Omit<Events, "_id">>(eventWithoutId)
 
         const eventWeights: weightsForEvent[] | undefined = event.weights
 
@@ -150,12 +150,113 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
             const newEventWeights: weightsForUserCreatedEvents[] = []
             insertUserCreatedEvent({ ...cleanEventWithoutId, createdEventWeights: newEventWeights }, returnedId)
         }
-        // the front end expects the id of the created event I think we should return the event though
+        // We return the event object
         return returnedId
     })
 
     return { ...cleanEvent, _id: new ObjectId(returnedEventId) }
 
+}
+
+const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">): Promise<Events | undefined> => {
+
+    const eventWithCreatedBy: Events = {
+        ...event,
+        createdBy
+    }
+
+    const cleanEventObject = cleanUndefinedOrNullKeys<Events>(eventWithCreatedBy)
+
+    // remove the _id from cleaned event object
+    const { _id, ...cleanEventObjectWithoutId } = cleanEventObject
+
+    // Update Event Where _id = event._id
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+
+        const updatedEvent = await db
+            .collection("events")
+            .updateOne({ _id: new ObjectId(event._id) }, { $set: cleanEventObjectWithoutId });
+
+        let { _id, name, date, description, cost, link } = cleanEventObject
+
+
+
+        // this function updates the corresponding event in the users createdEvents array
+        const updateUserCreatedEvent = async (event: Partial<createdEvents>, userId: ObjectId) => {
+            const client = await clientPromise;
+            const db = client.db();
+
+
+
+            const newEvent = await db
+                .collection("users")
+                .updateOne({ _id: new ObjectId(userId) }, { $set: { createdEvents: event } });
+            // return the created event's id
+
+            if (newEvent) {
+                return true
+            } else {
+                throw new Error("Event not created");
+            }
+        }
+
+
+        const eventWithId = {
+            createdEventId: _id,
+            createdEventName: name,
+            createdEventDate: date,
+            createdEventDescription: description,
+            createdEventCost: cost,
+            createdEventLink: link,
+        }
+
+        // we redue the process we did earlier
+        const cleanEventWithId = cleanUndefinedOrNullKeys<Events>(eventWithId)
+
+
+        const eventWeights: weightsForEvent[] | undefined = event.weights
+
+
+
+        // Here we have to construct the weightsForUserCreatedEvents object because it is different then the one on the actual event
+        if (Array.isArray(eventWeights) && eventWeights.length) {
+            const newEventWeights = eventWeights.map((weight) => {
+                const stringWeight = String(weight.weight)
+
+                const numberOfSpots = weight.spotsAvailable.length
+
+                const newFilledWithFalse = new Array(numberOfSpots).fill(false)
+
+                const returnObject: weightsForUserCreatedEvents = {
+                    weight: stringWeight,
+                    filled: newFilledWithFalse
+                }
+
+                return returnObject
+
+            })
+
+            // insert new document into user's createdEvents field
+            updateUserCreatedEvent({ ...cleanEventObjectWithoutId, createdEventWeights: newEventWeights }, createdBy)
+        } else {
+            const newEventWeights: weightsForUserCreatedEvents[] = []
+            updateUserCreatedEvent({ ...cleanEventObjectWithoutId, createdEventWeights: newEventWeights }, createdBy)
+        }
+
+
+
+
+        if (updatedEvent) {
+            return cleanEventObject;
+        } else {
+            throw new Error("Event not updated");
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
 }
 
 // create a function that deletes an event
@@ -164,7 +265,11 @@ const deleteEvent = async (eventId: ObjectId, userId: ObjectId) => {
         const client = await clientPromise;
         const db = client.db();
 
-        const queries = await Promise.all([db.collection("events").deleteOne({ _id: new ObjectId(eventId) }), db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $pull: { createdEvents: { createdEventId: new ObjectId(eventId) } } })])
+        const queries = await Promise.all([
+            db.collection("events").deleteOne({ _id: new ObjectId(eventId) }),
+            db.collection("users").updateOne({ _id: new ObjectId(userId) },
+                { $pull: { createdEvents: { createdEventId: new ObjectId(eventId) } } })
+        ])
 
 
 
@@ -180,32 +285,10 @@ const deleteEvent = async (eventId: ObjectId, userId: ObjectId) => {
     }
 }
 
-// create a function that updates the user's events
-const updateUserEvents = async (userId: ObjectId, eventId: ObjectId) => {
-
-    try {
-        const client = await clientPromise;
-        const db = client.db();
-
-        const updatedUser = await db
-            .collection("users")
-            .updateOne({ _id: userId }, { $push: { events: eventId } });
-        // return the created event's id
-        const returnedId: ObjectId = updatedUser.upsertedId;
-
-        if (updatedUser) {
-            return returnedId;
-        } else {
-            throw new Error("Event not created");
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
 
 
 const dbMutations = {
-    createUser, createEvent, deleteEvent,
+    createUser, createEvent, updateEvent, deleteEvent,
 }
 
 export default dbMutations;

@@ -9,7 +9,7 @@ export const errorIfPromiseFalse = async (theFunction: Promise<any>, message: st
 }
 
 // @todo add this to blog it removes any keys that are undefined or null
-export const cleanUndefinedOrNullKeys = (obj: Object) => (
+export const cleanUndefinedOrNullKeys = <T>(obj: Object) => (
     Object.fromEntries(
         Object.entries(obj).filter(([k, v]) => v != null || v != undefined)
-    ));
+    )) as T;
