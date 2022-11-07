@@ -122,12 +122,24 @@ export class weightsForEvent {
 // we can then map through that array and only display the events that and make sure there aren't any new events that 
 // they have been accepted to
 
+type Point = 'Point';
+
+export class Location {
+    type: Point;
+    coordinates: number[];
+
+    constructor(coordinates: number[]) {
+        this.type = 'Point';
+        // coordinates should be in the format [longitude, latitude]
+        this.coordinates = coordinates;
+    }
+}
 
 
 export class Event {
     _id: ObjectId;
     createdBy: ObjectId;
-    location: number[];
+    location: Location
     name: string;
     date: Date;
     description: string;
@@ -136,7 +148,7 @@ export class Event {
     weights?: weightsForEvent[];
     eventApplicants?: applicant[] | undefined;
 
-    constructor(createdBy: ObjectId, location: number[], name: string, date: Date, description: string, _id: ObjectId, cost?: string, link?: string,
+    constructor(createdBy: ObjectId, location: Location, name: string, date: Date, description: string, _id: ObjectId, cost?: string, link?: string,
         weights?: weightsForEvent[], eventApplicants?: applicant[] | undefined) {
         this.createdBy = createdBy;
         this._id = _id;

@@ -6,6 +6,7 @@ import clientPromise from 'lib/mongodb';
 
 const createUser = async (user: Omit<User, "_id">): Promise<ObjectId | undefined> => {
 
+    // basic MongoDB query
     try {
         const client = await clientPromise;
         const db = client.db();
@@ -53,7 +54,7 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
 
 
 
-    // cleaning
+    // cleaning with setting the expected return type using generics
     const cleanEventWithoutEventApplicants = cleanUndefinedOrNullKeys<Omit<Events, "_id" | "eventApplicants">>(dirtyEventWithoutEventApplicants)
 
     const cleanEvent = {
@@ -65,7 +66,7 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
 
 
 
-    // Here we define our two functions so we can later await them consecutively
+    // Here we define our two functions so we can later await them consecutively using Promise.all
     const insertEvent = async () => {
         const client = await clientPromise;
         const db = client.db();
@@ -126,13 +127,16 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
 
 
 
-        // Here we have to construct the weightsForUserCreatedEvents object because it is different then the one on the actual event
+        // Here we have to construct the weightsForUserCreatedEvents array of objects because it is different then the one on the actual event
         if (Array.isArray(eventWeights) && eventWeights.length) {
+            // Here we map through the weights array and create a new array of false values we will use this in the front end later
             const newEventWeights = eventWeights.map((weight) => {
                 const stringWeight = String(weight.weight)
 
+                // we use the previous arrays length to determine how many false values we need
                 const numberOfSpots = weight.spotsAvailable.length
 
+                // this is the array of false values we will use in the front end 
                 const newFilledWithFalse = new Array(numberOfSpots).fill(false)
 
                 const returnObject: weightsForUserCreatedEvents = {
@@ -160,14 +164,16 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
 
 const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">): Promise<Events | undefined> => {
 
+    // We don't want to repeate so we only pass createdBy once and use it here
     const eventWithCreatedBy: Events = {
         ...event,
         createdBy
     }
 
+    // removing the null and undefined keys
     const cleanEventObject = cleanUndefinedOrNullKeys<Events>(eventWithCreatedBy)
 
-    // remove the _id from cleaned event object
+    // remove the _id from cleaned event object because we don't want to risk altering the id
     const { _id, ...cleanEventObjectWithoutId } = cleanEventObject
 
     // Update Event Where _id = event._id
@@ -179,6 +185,8 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
             .collection("events")
             .updateOne({ _id: new ObjectId(event._id) }, { $set: cleanEventObjectWithoutId });
 
+
+        // we are going to update the user's createdEvents field as well using these values
         let { _id, name, date, description, cost, link } = cleanEventObject
 
 
@@ -188,12 +196,13 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
             const client = await clientPromise;
             const db = client.db();
 
+
+            // we need the id on this one because it is a reference to the event
             const eventWithConfirmedProperId: createdEvents = {
                 ...event,
                 createdEventId: new ObjectId(event.createdEventId)
             }
 
-            console.log({ eventWithConfirmedProperId, userId })
 
             const newEvent = await db
                 .collection("users")
@@ -210,6 +219,7 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
         }
 
 
+        // Here we build the correct names for the field we are updating
         const eventWithId = {
             createdEventId: _id,
             createdEventName: name,
@@ -254,7 +264,7 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
 
 
 
-
+        // Here we return the full event object because that is what we will want on the front end
         if (updatedEvent) {
             return cleanEventObject;
         } else {
@@ -272,6 +282,7 @@ const deleteEvent = async (eventId: ObjectId, userId: ObjectId) => {
         const client = await clientPromise;
         const db = client.db();
 
+        // Here we use promises because we can do these queries in parallel
         const queries = await Promise.all([
             db.collection("events").deleteOne({ _id: new ObjectId(eventId) }),
             db.collection("users").updateOne({ _id: new ObjectId(userId) },

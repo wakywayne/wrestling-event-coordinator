@@ -1,12 +1,12 @@
 import { createYoga } from 'graphql-yoga'
 import { ObjectId } from 'bson';
-import { DateTimeResolver, ObjectIDResolver } from 'graphql-scalars';
+import { DateTimeResolver, ObjectIDResolver, JSONObjectResolver } from 'graphql-scalars';
 import SchemaBuilder, { initContextCache } from "@pothos/core"
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import WithInputPlugin from "@pothos/plugin-with-input"
 import {
     User, createdEvents, userSignedUpEvents, weightsForUserCreatedEvents,
-    Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant
+    Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant, Location
 } from 'gql';
 import axios from 'axios';
 // import { getSession } from 'next-auth/react';
@@ -56,8 +56,11 @@ const builder = new SchemaBuilder<{
             Input: ObjectId;
             Output: ObjectId;
         };
+        JSONObject: {
+            Input: any;
+            Output: any;
+        };
     };
-
     DefaultFieldNullability: true;
 
 }>({
@@ -97,6 +100,7 @@ const builder = new SchemaBuilder<{
 
 builder.addScalarType('mongoId', ObjectIDResolver, {});
 builder.addScalarType('Date', DateTimeResolver, {});
+builder.addScalarType('JSONObject', JSONObjectResolver, {});
 
 
 // User object type
@@ -202,7 +206,13 @@ builder.objectType(userSignedUpEvents, {
     })
 })
 
-
+builder.objectType(Location, {
+    name: 'Location',
+    fields: (t) => ({
+        type: t.exposeString('type', { nullable: false }),
+        coordinates: t.exposeFloatList('coordinates', { nullable: false }),
+    })
+})
 
 
 
@@ -221,7 +231,11 @@ builder.objectType(EventType, {
             nullable: false,
             resolve: (event) => event.createdBy
         }),
-        location: t.exposeFloatList('location'),
+        location: t.field({
+            type: Location,
+            nullable: false,
+            resolve: (event) => event.location
+        }),
         name: t.exposeString('name', { nullable: false }),
         date: t.field({
             // type: Date,
@@ -395,7 +409,8 @@ builder.mutationType({
         // Things only logged in users can do
         createEvent: t.fieldWithInput({
             input: {
-                location: t.input.string({ required: true }),
+                longitude: t.input.float({ required: true }),
+                latitude: t.input.float({ required: true }),
                 name: t.input.string({ required: true }),
                 date: t.input.field({ type: 'Date', required: true }),
                 description: t.input.string({ required: true }),
@@ -404,11 +419,15 @@ builder.mutationType({
                 weights: t.input.string(),
             },
             type: EventType,
-            resolve: (_, { input: { location, name, date, description, cost, link, weights, } }, context) => {
+            resolve: (_, { input: { longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
 
+                const location: Location = {
+                    type: 'Point',
+                    coordinates: [longitude, latitude]
+                }
 
                 let anObject = {
-                    createdBy: context.currentUser._id as ObjectId, location: JSON.parse(location), name, date, description,
+                    createdBy: context.currentUser._id as ObjectId, location, name, date, description,
                     cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
                 }
 
@@ -418,7 +437,8 @@ builder.mutationType({
         updateEvent: t.fieldWithInput({
             input: {
                 _id: t.input.field({ type: 'mongoId', required: true }),
-                location: t.input.string({ required: true }),
+                longitude: t.input.float({ required: true }),
+                latitude: t.input.float({ required: true }),
                 name: t.input.string({ required: true }),
                 date: t.input.field({ type: 'Date', required: true }),
                 description: t.input.string({ required: true }),
@@ -427,11 +447,15 @@ builder.mutationType({
                 weights: t.input.string(),
             },
             type: EventType,
-            resolve: (_, { input: { _id, location, name, date, description, cost, link, weights, } }, context) => {
+            resolve: (_, { input: { _id, longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
 
+                const location: Location = {
+                    type: 'Point',
+                    coordinates: [longitude, latitude]
+                }
 
                 let anObject = {
-                    _id: _id as ObjectId, location: location && JSON.parse(location), name, date, description,
+                    _id: _id as ObjectId, location, name, date, description,
                     cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
                 }
 
