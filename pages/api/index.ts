@@ -14,7 +14,7 @@ import { unstable_getServerSession } from "next-auth/next"
 import { apiUrl } from '@/config/index';
 import dbQueries from '@lib/queries';
 import dbMutations from '@lib/mutations';
-import { errorIfPromiseFalse, cleanUndefinedOrNullKeys as keyCleaner } from 'utils';
+import { errorIfPromiseFalse } from 'utils';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authOptions, TheFinalSession } from './auth/[...nextauth]';
 
@@ -156,7 +156,6 @@ builder.objectType(createdEvents, {
             resolve: (createdEvents) => createdEvents.createdEventDate
         }),
         createdEventDescription: t.exposeString('createdEventDescription', { nullable: false }),
-        createdEventViewedApplicants: t.exposeBoolean('createdEventViewedApplicants', { nullable: false }),
         createdEventCost: t.exposeString('createdEventCost'),
         createdEventLink: t.exposeString('createdEventLink'),
         createdEventWeights: t.field({
@@ -396,7 +395,6 @@ builder.mutationType({
         // Things only logged in users can do
         createEvent: t.fieldWithInput({
             input: {
-                createdBy: t.input.field({ type: 'mongoId', required: true }),
                 location: t.input.string({ required: true }),
                 name: t.input.string({ required: true }),
                 date: t.input.field({ type: 'Date', required: true }),
@@ -404,23 +402,30 @@ builder.mutationType({
                 cost: t.input.string(),
                 link: t.input.string(),
                 weights: t.input.string(),
-                eventApplicants: t.input.string(),
             },
             type: 'mongoId',
-            resolve: (_, { input: { createdBy, location, name, date, description, cost, link, weights, eventApplicants } }) => {
+            resolve: (_, { input: { location, name, date, description, cost, link, weights, } }, context) => {
 
 
                 let anObject = {
-                    createdBy, location: JSON.parse(location), name, date, description,
+                    createdBy: context.currentUser._id as ObjectId, location: JSON.parse(location), name, date, description,
                     cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
-                    eventApplicants: eventApplicants && JSON.parse(eventApplicants)
                 }
 
-                // Typescript can't figure out the key since we manually build an object above
-                // @ts-ignore
-                const cleanObject: EventType = keyCleaner(anObject);
-
-                return dbMutations.createEvent(cleanObject);
+                return dbMutations.createEvent(anObject);
+            }
+        }),
+        deleteEvent: t.field({
+            args: {
+                id: t.arg({ type: 'mongoId', required: true })
+            },
+            type: 'Boolean',
+            resolve: async (parent, args, context) => {
+                try {
+                    return await errorIfPromiseFalse(dbMutations.deleteEvent(args.id, context.currentUser._id), 'Error deleting event')
+                } catch (err) {
+                    console.log(err)
+                }
             }
         }),
     })

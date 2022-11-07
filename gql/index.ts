@@ -17,25 +17,22 @@ export class weightsForUserCreatedEvents {
 // @todo change these to start with created event in the database
 export class createdEvents {
     createdEventId: ObjectId;
-    // createdEventId: string;
     createdEventName: string;
     createdEventDate: Date;
     createdEventDescription: string;
-    createdEventViewedApplicants: boolean;
     createdEventCost?: string;
     createdEventLink?: string;
     createdEventWeights?: weightsForUserCreatedEvents[];
 
 
     constructor(createdEventId: ObjectId, createdEventName: string, createdEventDate: Date, createdEventDescription: string,
-        createdEventViewedApplicants: boolean, createdEventCost?: string, createdEventLink?: string,
+        createdEventCost?: string, createdEventLink?: string,
         createdEventWeights?: weightsForUserCreatedEvents[]) {
 
         this.createdEventId = createdEventId;
         this.createdEventName = createdEventName;
         this.createdEventDate = createdEventDate;
         this.createdEventDescription = createdEventDescription;
-        this.createdEventViewedApplicants = createdEventViewedApplicants;
         this.createdEventCost = createdEventCost;
         this.createdEventLink = createdEventLink;
         this.createdEventWeights = createdEventWeights;
