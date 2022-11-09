@@ -1,5 +1,5 @@
 import { ObjectId } from 'bson';
-import { User, Event as Events, weightsForEvent, weightsForUserCreatedEvents, createdEvents } from 'gql';
+import { User, Event as Events, weightsForEvent, weightsForUserCreatedEvents, createdEvents, Location } from 'gql';
 import { cleanUndefinedOrNullKeys } from 'utils'
 import clientPromise from 'lib/mongodb';
 
@@ -27,8 +27,21 @@ const createUser = async (user: Omit<User, "_id">): Promise<ObjectId | undefined
     }
 }
 
+interface partialEvent {
+    _id: ObjectId
+    createdBy: ObjectId
+    name: string
+    description: string
+    date: Date
+    cost?: string
+    link?: string
+    location: Location
+    // mission failed we will get em next time
+    weights: any
+}
+
 // create a function that creates an event
-const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Promise<Events | undefined> => {
+const createEvent = async (event: Omit<partialEvent, "_id" | "eventApplicants">): Promise<Events | undefined> => {
 
     const createdBy = event.createdBy
     const name = event.name
@@ -134,7 +147,7 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
                 const stringWeight = String(weight.weight)
 
                 // we use the previous arrays length to determine how many false values we need
-                const numberOfSpots = weight.spotsAvailable.length
+                const numberOfSpots = weight.spotsAvailable?.length ? weight.spotsAvailable.length : 0
 
                 // this is the array of false values we will use in the front end 
                 const newFilledWithFalse = new Array(numberOfSpots).fill(false)
@@ -162,10 +175,10 @@ const createEvent = async (event: Omit<Events, "_id" | "eventApplicants">): Prom
 
 }
 
-const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">): Promise<Events | undefined> => {
+const updateEvent = async (createdBy: ObjectId, event: Omit<partialEvent, "createdBy">): Promise<Events | undefined> => {
 
     // We don't want to repeate so we only pass createdBy once and use it here
-    const eventWithCreatedBy: Events = {
+    const eventWithCreatedBy: partialEvent = {
         ...event,
         createdBy
     }
@@ -242,7 +255,7 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<Events, "createdBy">
             const newEventWeights = eventWeights.map((weight) => {
                 const stringWeight = String(weight.weight)
 
-                const numberOfSpots = weight.spotsAvailable.length
+                const numberOfSpots = weight.spotsAvailable?.length ? weight.spotsAvailable.length : 0
 
                 const newFilledWithFalse = new Array(numberOfSpots).fill(false)
 

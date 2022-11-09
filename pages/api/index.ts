@@ -1,12 +1,12 @@
 import { createYoga } from 'graphql-yoga'
 import { ObjectId } from 'bson';
-import { DateTimeResolver, ObjectIDResolver, JSONObjectResolver } from 'graphql-scalars';
+import { DateTimeResolver, ObjectIDResolver, JSONDefinition, JSONResolver } from 'graphql-scalars';
 import SchemaBuilder, { initContextCache } from "@pothos/core"
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import WithInputPlugin from "@pothos/plugin-with-input"
 import {
     User, createdEvents, userSignedUpEvents, weightsForUserCreatedEvents,
-    Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant, Location
+    Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant, Location, Empty
 } from 'gql';
 import axios from 'axios';
 // import { getSession } from 'next-auth/react';
@@ -17,6 +17,8 @@ import dbMutations from '@lib/mutations';
 import { errorIfPromiseFalse } from 'utils';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authOptions, TheFinalSession } from './auth/[...nextauth]';
+import { type } from 'os';
+import { JSON } from 'graphql-scalars/typings/mocks';
 
 
 const fetchUser = async (url: string) => {
@@ -60,6 +62,10 @@ const builder = new SchemaBuilder<{
             Input: any;
             Output: any;
         };
+        objectIdOrEmpty: {
+            Input: ObjectId | Empty;
+            Output: ObjectId | Empty;
+        };
     };
     DefaultFieldNullability: true;
 
@@ -100,7 +106,65 @@ const builder = new SchemaBuilder<{
 
 builder.addScalarType('mongoId', ObjectIDResolver, {});
 builder.addScalarType('Date', DateTimeResolver, {});
-builder.addScalarType('JSONObject', JSONObjectResolver, {});
+// builder.addScalarType('JSONObject', JSONResolver, {});
+
+builder.scalarType('JSONObject', {
+    serialize: (value) => {
+        return value;
+    },
+
+    parseValue: (value: any) => {
+        if (value !== null && value !== undefined) {
+            return value;
+        }
+        else {
+            throw new Error('JSONObject cannot represent non-object value: ' + value);
+        }
+    }
+})
+// builder.scalarType('JSONObject', {
+//     serialize: (value) => {
+//         let o = JSON.parse(JSON.stringify(value));
+//         if (o && o._id) {
+//             return o
+//         } else {
+//             throw new Error('Not a valid JSON Object');
+//         }
+//     },
+
+//     parseValue: (value) => {
+//         if (typeof value === 'object') {
+//             return value
+//         } else
+//             throw new Error('Invalid value for Json Type Custom Scalar');
+//     }
+// })
+
+
+// create a scalar type that can be either an ObjectId or an empty string
+builder.scalarType('objectIdOrEmpty', {
+    serialize: (value) => value,
+
+    parseValue: (value) => {
+        if (value === 'empty') {
+            return 'empty';
+        } else if (typeof value === 'string') {
+            const isObject = ObjectId.isValid(value);
+            if (isObject) {
+                return new ObjectId(value);
+            } else {
+                throw new Error('Value is not a valid object id according to custom scalar');
+            }
+        }
+
+
+        throw new Error('Invalid value for ObjectIdOrEmpty Custom Scalar');
+    }
+}
+);
+
+
+
 
 
 // User object type
@@ -216,6 +280,9 @@ builder.objectType(Location, {
 
 
 
+
+
+
 // Event object type
 builder.objectType(EventType, {
     name: 'Event',
@@ -290,12 +357,23 @@ builder.objectType(weightsForEvent, {
     })
 })
 
+const weightsForEventInput = builder.inputType('weightsForEventInput', {
+    fields: (t) => ({
+        weight: t.int(),
+        spotsAvailable: t.field({
+            type: [spotsAvailableForEventInput],
+        })
+    })
+})
+
+
+
 // On the event type
 builder.objectType(applicant, {
     name: 'applicant',
     fields: (t) => ({
         userId: t.field({
-            type: 'mongoId',
+            type: 'objectIdOrEmpty',
             nullable: false,
             resolve: (parent) => parent.userId
         }),
@@ -310,14 +388,22 @@ builder.objectType(spotsAvailableForEvent, {
     fields: (t) => ({
         userId: t.field({
             // type: 'String',
-            type: 'mongoId',
+            type: 'objectIdOrEmpty',
             resolve: (parent) => parent.userId
         }),
         name: t.exposeString('name'),
 
     })
 })
-
+// On the event input
+const spotsAvailableForEventInput = builder.inputType("spotsAvailableForEventInput", {
+    fields: (t) => ({
+        userId: t.field({
+            type: 'objectIdOrEmpty',
+        }),
+        name: t.string(),
+    })
+})
 
 
 
@@ -388,11 +474,14 @@ builder.queryType({
 
 
 
-
-
+// Root Mutation type
 builder.mutationType({
     fields: (t) => ({
-        // Things all users can do
+
+        // Logged In user EVENT mutations Below
+        // ------------------------------------
+
+        // Create a user we don't use this I will remove before prod
         createUser: t.field({
             args: {
                 email: t.arg({ type: 'String', required: true }),
@@ -406,7 +495,7 @@ builder.mutationType({
             }
         }),
 
-        // Things only logged in users can do
+        // Creating an event
         createEvent: t.fieldWithInput({
             input: {
                 longitude: t.input.float({ required: true }),
@@ -416,7 +505,10 @@ builder.mutationType({
                 description: t.input.string({ required: true }),
                 cost: t.input.string(),
                 link: t.input.string(),
-                weights: t.input.string(),
+                // 
+                // We need to get weights working here
+                // 
+                weights: t.input.field({ type: [weightsForEventInput] })
             },
             type: EventType,
             resolve: (_, { input: { longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
@@ -425,15 +517,17 @@ builder.mutationType({
                     type: 'Point',
                     coordinates: [longitude, latitude]
                 }
-
                 let anObject = {
                     createdBy: context.currentUser._id as ObjectId, location, name, date, description,
-                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
+                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
                 }
+
 
                 return dbMutations.createEvent(anObject);
             }
         }),
+
+        // Update an event
         updateEvent: t.fieldWithInput({
             input: {
                 _id: t.input.field({ type: 'mongoId', required: true }),
@@ -444,7 +538,7 @@ builder.mutationType({
                 description: t.input.string({ required: true }),
                 cost: t.input.string(),
                 link: t.input.string(),
-                weights: t.input.string(),
+                weights: t.input.field({ type: [weightsForEventInput] })
             },
             type: EventType,
             resolve: (_, { input: { _id, longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
@@ -456,12 +550,14 @@ builder.mutationType({
 
                 let anObject = {
                     _id: _id as ObjectId, location, name, date, description,
-                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights && JSON.parse(weights),
+                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights ? weights : undefined,
                 }
 
                 return dbMutations.updateEvent(context.currentUser._id, anObject);
             }
         }),
+
+        // Delete an event
         deleteEvent: t.field({
             args: {
                 id: t.arg({ type: 'mongoId', required: true })

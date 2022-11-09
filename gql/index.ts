@@ -81,9 +81,9 @@ export class User {
 }
 
 
-
+export type Empty = "empty";
 export class spotsAvailableForEvent {
-    userId: ObjectId;
+    userId: ObjectId | Empty;
     // userId: string;
     name: string;
 
@@ -107,11 +107,11 @@ export class applicant extends spotsAvailableForEvent {
 
 
 export class weightsForEvent {
-    weight: number;
+    weight: number | null | undefined;
     // spotsAvailable: spotsAvailableForEvent[];
     spotsAvailable: spotsAvailableForEvent[];
 
-    constructor(weight: number, spotsAvailable: spotsAvailableForEvent[]) {
+    constructor(weight: number | null | undefined, spotsAvailable: spotsAvailableForEvent[]) {
         this.weight = weight;
         this.spotsAvailable = spotsAvailable;
     }
