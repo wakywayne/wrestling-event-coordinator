@@ -469,11 +469,6 @@ builder.queryType({
 
 
 
-
-
-
-
-
 // Root Mutation type
 builder.mutationType({
     fields: (t) => ({
@@ -505,9 +500,6 @@ builder.mutationType({
                 description: t.input.string({ required: true }),
                 cost: t.input.string(),
                 link: t.input.string(),
-                // 
-                // We need to get weights working here
-                // 
                 weights: t.input.field({ type: [weightsForEventInput] })
             },
             type: EventType,
@@ -519,7 +511,7 @@ builder.mutationType({
                 }
                 let anObject = {
                     createdBy: context.currentUser._id as ObjectId, location, name, date, description,
-                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
+                    cost: cost ? (cost) : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
                 }
 
 
@@ -543,15 +535,16 @@ builder.mutationType({
             type: EventType,
             resolve: (_, { input: { _id, longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
 
+
                 const location: Location = {
                     type: 'Point',
                     coordinates: [longitude, latitude]
                 }
-
                 let anObject = {
-                    _id: _id as ObjectId, location, name, date, description,
-                    cost: cost ? cost : undefined, link: link ? link : undefined, weights: weights ? weights : undefined,
+                    _id, location, name, date, description,
+                    cost: cost ? (cost) : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
                 }
+
 
                 return dbMutations.updateEvent(context.currentUser._id, anObject);
             }
