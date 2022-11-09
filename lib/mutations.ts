@@ -175,6 +175,7 @@ const createEvent = async (event: Omit<partialEvent, "_id" | "eventApplicants">)
 
 }
 
+// weeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 const updateEvent = async (createdBy: ObjectId, event: Omit<partialEvent, "createdBy">): Promise<Events | undefined> => {
 
     // We don't want to repeate so we only pass createdBy once and use it here
