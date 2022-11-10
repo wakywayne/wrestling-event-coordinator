@@ -464,6 +464,22 @@ builder.queryType({
                 }
             }
         }),
+        // Get event within plus or minus of a weight
+        eventsByWeight: t.field({
+            type: [EventType],
+            args: {
+                weight: t.arg.int({ required: true }),
+                plusOrMinus: t.arg.int({}),
+            },
+            resolve: async (parent, args, context) => {
+                try {
+                    let plusOrMinus = args.plusOrMinus ? args.plusOrMinus : undefined;
+                    return errorIfPromiseFalse(dbQueries.getEventBasedOnUserWeight(args.weight, plusOrMinus), 'Error finding event by weight')
+                } catch (err) {
+                    console.log(err)
+                }
+            }
+        })
     })
 })
 
