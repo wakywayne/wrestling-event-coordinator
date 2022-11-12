@@ -1,7 +1,7 @@
 import { signIn, useSession, signOut } from 'next-auth/react'
 import { useState, } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import useRouter from 'next/router';
 import { BsGoogle, BsFacebook } from 'react-icons/bs';
 
 interface Props {
@@ -79,9 +79,9 @@ const SignInForm: React.FC<Props> = () => {
     } else {
         return (
             <div>
-                <Link href='/'><a>
+                <Link href='/'>
                     <p className='text-xl text-center align-middle'>You are already signed in silly <span className='text-blue-500 hover:text-blue-800'>click to go Home</span></p>
-                </a></Link>
+                </Link>
                 <div onClick={() => signOut({ callbackUrl: 'http://localhost:3000/auth/signin?callbackUrl=/' })}>Or sign out</div>
             </div>
         )

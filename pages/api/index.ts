@@ -11,14 +11,27 @@ import {
 import axios from 'axios';
 // import { getSession } from 'next-auth/react';
 import { unstable_getServerSession } from "next-auth/next"
-import { apiUrl } from '@/config/index';
 import dbQueries from '@lib/queries';
 import dbMutations from '@lib/mutations';
 import { errorIfPromiseFalse } from 'utils';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authOptions, TheFinalSession } from './auth/[...nextauth]';
-import { type } from 'os';
 import { JSON } from 'graphql-scalars/typings/mocks';
+
+
+// Document Structure
+// SchemaDefinition & PluginDefinitions
+// Added Scalar Types & Custom Scalar Types
+// 
+// Object Type User(createdEvents(weightsForUserCreatedEvents), userSignedUpEvents)
+// Object Type EventType(weightsForEvent([weightsForEventInput]spotsAvailableForEvent([spotsAvailableForEventInput])), Location, applicants)
+// 
+// RootQuery Type: UserQueries, EventQueries
+// 
+// RootMutation Type: EventMutations
+// 
+// Context & Auth
+
 
 
 const fetchUser = async (url: string) => {
@@ -122,23 +135,7 @@ builder.scalarType('JSONObject', {
         }
     }
 })
-// builder.scalarType('JSONObject', {
-//     serialize: (value) => {
-//         let o = JSON.parse(JSON.stringify(value));
-//         if (o && o._id) {
-//             return o
-//         } else {
-//             throw new Error('Not a valid JSON Object');
-//         }
-//     },
 
-//     parseValue: (value) => {
-//         if (typeof value === 'object') {
-//             return value
-//         } else
-//             throw new Error('Invalid value for Json Type Custom Scalar');
-//     }
-// })
 
 
 // create a scalar type that can be either an ObjectId or an empty string
@@ -270,13 +267,7 @@ builder.objectType(userSignedUpEvents, {
     })
 })
 
-builder.objectType(Location, {
-    name: 'Location',
-    fields: (t) => ({
-        type: t.exposeString('type', { nullable: false }),
-        coordinates: t.exposeFloatList('coordinates', { nullable: false }),
-    })
-})
+
 
 
 
@@ -357,28 +348,13 @@ builder.objectType(weightsForEvent, {
     })
 })
 
+// On the event mutation
 const weightsForEventInput = builder.inputType('weightsForEventInput', {
     fields: (t) => ({
         weight: t.int(),
         spotsAvailable: t.field({
             type: [spotsAvailableForEventInput],
         })
-    })
-})
-
-
-
-// On the event type
-builder.objectType(applicant, {
-    name: 'applicant',
-    fields: (t) => ({
-        userId: t.field({
-            type: 'objectIdOrEmpty',
-            nullable: false,
-            resolve: (parent) => parent.userId
-        }),
-        name: t.exposeString('name', { nullable: false }),
-        weight: t.exposeInt('weight', { nullable: false }),
     })
 })
 
@@ -395,7 +371,8 @@ builder.objectType(spotsAvailableForEvent, {
 
     })
 })
-// On the event input
+
+// On the event mutation
 const spotsAvailableForEventInput = builder.inputType("spotsAvailableForEventInput", {
     fields: (t) => ({
         userId: t.field({
@@ -405,15 +382,44 @@ const spotsAvailableForEventInput = builder.inputType("spotsAvailableForEventInp
     })
 })
 
+// On the event type
+builder.objectType(applicant, {
+    name: 'applicant',
+    fields: (t) => ({
+        userId: t.field({
+            type: 'objectIdOrEmpty',
+            nullable: false,
+            resolve: (parent) => parent.userId
+        }),
+        name: t.exposeString('name', { nullable: false }),
+        weight: t.exposeInt('weight', { nullable: false }),
+    })
+})
+
+
+builder.objectType(Location, {
+    name: 'Location',
+    fields: (t) => ({
+        type: t.exposeString('type', { nullable: false }),
+        coordinates: t.exposeFloatList('coordinates', { nullable: false }),
+    })
+})
 
 
 
 
 
 
-// This is our root query type
+
+
+
+
+
+
+// This is our RootQuery type
 builder.queryType({
     fields: (t) => ({
+        // UserQueries
         // Get all users from exampleUsers
         users: t.field({
             type: [User],
@@ -428,17 +434,18 @@ builder.queryType({
         // Get a user by id
         userById: t.field({
             type: User,
-            args: {
-                id: t.arg({ type: 'mongoId', required: true })
-            },
             resolve: async (parent, args, context) => {
                 try {
-                    return await errorIfPromiseFalse(dbQueries.getUserById(args.id), 'Error finding user by id')
+                    const user = await errorIfPromiseFalse(dbQueries.getUserById(context.currentUser._id), 'Error finding user by id')
+                    if (user) {
+                        return user;
+                    }
                 } catch (err) {
                     console.log(err)
                 }
             }
         }),
+        // EventQueries
         // Get all events 
         events: t.field({
             type: [EventType],
@@ -474,114 +481,173 @@ builder.queryType({
             resolve: async (parent, args, context) => {
                 try {
                     let plusOrMinus = args.plusOrMinus ? args.plusOrMinus : undefined;
-                    return errorIfPromiseFalse(dbQueries.getEventBasedOnUserWeight(args.weight, plusOrMinus), 'Error finding event by weight')
+                    return errorIfPromiseFalse(dbQueries.getEventBasedOnUserWeight(args.weight, plusOrMinus), 'Error finding event by weight filter')
                 } catch (err) {
                     console.log(err)
                 }
             }
-        })
-    })
-})
-
-
-
-// Root Mutation type
-builder.mutationType({
-    fields: (t) => ({
-
-        // Logged In user EVENT mutations Below
-        // ------------------------------------
-
-        // Create a user we don't use this I will remove before prod
-        createUser: t.field({
+        }),
+        // Get events close to the user
+        eventsByDistance: t.field({
+            type: [EventType],
             args: {
-                email: t.arg({ type: 'String', required: true }),
+                coordinates: t.arg.floatList({ required: true }),
             },
-            type: 'mongoId',
-            resolve: async (parent, { email }, context) => {
-
-                const user = await dbMutations.createUser({ email })
-                console.log(user)
-                return user;
-            }
-        }),
-
-        // Creating an event
-        createEvent: t.fieldWithInput({
-            input: {
-                longitude: t.input.float({ required: true }),
-                latitude: t.input.float({ required: true }),
-                name: t.input.string({ required: true }),
-                date: t.input.field({ type: 'Date', required: true }),
-                description: t.input.string({ required: true }),
-                cost: t.input.string(),
-                link: t.input.string(),
-                weights: t.input.field({ type: [weightsForEventInput] })
-            },
-            type: EventType,
-            resolve: (_, { input: { longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
-
-                const location: Location = {
-                    type: 'Point',
-                    coordinates: [longitude, latitude]
-                }
-                let anObject = {
-                    createdBy: context.currentUser._id as ObjectId, location, name, date, description,
-                    cost: cost ? (cost) : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
-                }
-
-
-                return dbMutations.createEvent(anObject);
-            }
-        }),
-
-        // Update an event
-        updateEvent: t.fieldWithInput({
-            input: {
-                _id: t.input.field({ type: 'mongoId', required: true }),
-                longitude: t.input.float({ required: true }),
-                latitude: t.input.float({ required: true }),
-                name: t.input.string({ required: true }),
-                date: t.input.field({ type: 'Date', required: true }),
-                description: t.input.string({ required: true }),
-                cost: t.input.string(),
-                link: t.input.string(),
-                weights: t.input.field({ type: [weightsForEventInput] })
-            },
-            type: EventType,
-            resolve: (_, { input: { _id, longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
-
-
-                const location: Location = {
-                    type: 'Point',
-                    coordinates: [longitude, latitude]
-                }
-                let anObject = {
-                    _id, location, name, date, description,
-                    cost: cost ? (cost) : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
-                }
-
-
-                return dbMutations.updateEvent(context.currentUser._id, anObject);
-            }
-        }),
-
-        // Delete an event
-        deleteEvent: t.field({
-            args: {
-                id: t.arg({ type: 'mongoId', required: true })
-            },
-            type: 'Boolean',
             resolve: async (parent, args, context) => {
                 try {
-                    return await errorIfPromiseFalse(dbMutations.deleteEvent(args.id, context.currentUser._id), 'Error deleting event')
+                    return errorIfPromiseFalse(dbQueries.getEventBasedOnUserLocation(args.coordinates), 'Error finding events by location filter')
                 } catch (err) {
                     console.log(err)
                 }
             }
         }),
     })
-})
+}),
+
+
+
+    // RootMutation type
+    builder.mutationType({
+        fields: (t) => ({
+
+            // Logged In user EventMutations Below
+            // ------------------------------------
+
+            // Create a user we don't use this I will remove before prod
+            createUser: t.field({
+                args: {
+                    email: t.arg({ type: 'String', required: true }),
+                },
+                type: 'mongoId',
+                resolve: async (parent, { email }, context) => {
+
+                    const user = await dbMutations.createUser({ email })
+                    console.log(user)
+                    return user;
+                }
+            }),
+
+            // Creating an event
+            createEvent: t.fieldWithInput({
+                input: {
+                    longitude: t.input.float({ required: true }),
+                    latitude: t.input.float({ required: true }),
+                    name: t.input.string({ required: true }),
+                    date: t.input.field({ type: 'Date', required: true }),
+                    description: t.input.string({ required: true }),
+                    cost: t.input.string(),
+                    link: t.input.string(),
+                    weights: t.input.field({ type: [weightsForEventInput] })
+                },
+                type: EventType,
+                resolve: (_, { input: { longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
+
+                    const location: Location = {
+                        type: 'Point',
+                        coordinates: [longitude, latitude]
+                    }
+                    let anObject = {
+                        createdBy: context.currentUser._id as ObjectId, location, name, date, description,
+                        cost: cost ? (cost) : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
+                    }
+
+
+                    return dbMutations.createEvent(anObject);
+                }
+            }),
+
+            // Update an event
+            updateEvent: t.fieldWithInput({
+                input: {
+                    _id: t.input.field({ type: 'mongoId', required: true }),
+                    longitude: t.input.float({ required: true }),
+                    latitude: t.input.float({ required: true }),
+                    name: t.input.string({ required: true }),
+                    date: t.input.field({ type: 'Date', required: true }),
+                    description: t.input.string({ required: true }),
+                    cost: t.input.string(),
+                    link: t.input.string(),
+                    weights: t.input.field({ type: [weightsForEventInput] })
+                },
+                type: EventType,
+                resolve: (_, { input: { _id, longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
+
+
+                    const location: Location = {
+                        type: 'Point',
+                        coordinates: [longitude, latitude]
+                    }
+                    let anObject = {
+                        _id, location, name, date, description,
+                        cost: cost ? (cost) : undefined, link: link ? link : undefined, weights: weights ? weights : undefined
+                    }
+
+
+                    return dbMutations.updateEvent(context.currentUser._id, anObject);
+                }
+            }),
+
+            // Delete an event
+            deleteEvent: t.field({
+                args: {
+                    id: t.arg({ type: 'mongoId', required: true })
+                },
+                type: 'Boolean',
+                resolve: async (parent, args, context) => {
+                    try {
+                        return await errorIfPromiseFalse(dbMutations.deleteEvent(args.id, context.currentUser._id), 'Error deleting event')
+                    } catch (err) {
+                        console.log(err)
+                    }
+                }
+            }),
+
+            // Logged in user UserMutations Below
+            // ------------------------------------
+
+            // ApplyToEvent
+            applyToEvent: t.fieldWithInput({
+                input: {
+                    eventId: t.input.field({ type: 'mongoId', required: true }),
+                    name: t.input.string({ required: true }),
+                    weight: t.input.float({ required: true }),
+                    eventName: t.input.string({ required: true }),
+                    eventDate: t.input.field({ type: 'Date', required: true }),
+                },
+                type: 'Boolean',
+                resolve: async (parent, { input: { eventId, name, weight, eventName, eventDate } }, context) => {
+                    try {
+                        return await errorIfPromiseFalse(dbMutations.applyToEvent(context.currentUser._id, name, weight, eventId,
+                            eventName, eventDate), 'Error applying to event')
+                    } catch (err) {
+                        console.log(err)
+                    }
+                }
+            }),
+
+            acceptApplicant: t.fieldWithInput({
+                input: {
+                    eventId: t.input.field({ type: 'mongoId', required: true }),
+                    createdBy: t.input.field({ type: 'mongoId', required: true }),
+                    applicantId: t.input.field({ type: 'mongoId', required: true }),
+                    applicantName: t.input.string({ required: true }),
+                    boolean: t.input.boolean({ required: true })
+                },
+                type: 'Boolean',
+                resolve: async (parent, { input: { eventId, createdBy, applicantId, applicantName, boolean } }, context) => {
+                    try {
+                        if (context.currentUser._id == createdBy) {
+                            return await errorIfPromiseFalse(dbMutations.acceptOrRemoveApplicant(eventId, createdBy, applicantId, applicantName, boolean), 'Error accepting applicant')
+                        } else {
+                            return new Error('You are not the creator of this event')
+                        }
+                    } catch (err) {
+                        console.log(err)
+                    }
+                }
+            }),
+        })
+    })
 
 const schema = builder.toSchema({})
 

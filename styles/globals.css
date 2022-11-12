@@ -1,6 +1,6 @@
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
+@tailwind components;
 
 body {
   font-size: calc(15px + 0.5vw);
@@ -11,4 +11,15 @@ h1,
 h2,
 h3 {
   margin: 0 0 calc(16px+ 1vw) 0;
+}
+
+
+::-moz-selection {
+  background-color: #000000;
+  color: #fff;
+}
+
+::selection {
+  background-color: #000000;
+  color: #fff;
 }

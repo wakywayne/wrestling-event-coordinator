@@ -46,13 +46,19 @@
     "jsx": "preserve",
     "incremental": true,
     "strictNullChecks": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "config/index.js",
-    "pages/api/graphql.js"
+    "pages/api/graphql.js",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

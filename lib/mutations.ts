@@ -40,6 +40,9 @@ interface partialEvent {
     weights: any
 }
 
+// @todo the create event and update event should not need to update user created events
+// this should be done in the background of our api by adding a mongodb trigger listener that handles the logic every time an event
+//  is created or updated on second maybe only when the field is updated so we will leave the logic in for created events
 // create a function that creates an event
 const createEvent = async (event: Omit<partialEvent, "_id" | "eventApplicants">): Promise<Events | undefined> => {
 
@@ -317,10 +320,104 @@ const deleteEvent = async (eventId: ObjectId, userId: ObjectId) => {
     }
 }
 
+// add a user to applicants
+
+const applyToEvent = async (userId: ObjectId, name: string, weight: number, eventId: ObjectId, eventName: string, eventDate: Date) => {
+
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+
+        // Here we use promises because we can do these queries in parallel
+        // I want to eventually add a check to see if the user has already signed up for an event on this date
+        // I will do this by making this query a transaction
+        const queries = await Promise.all([
+            db.collection("events").updateOne({ _id: new ObjectId(eventId), }, { $push: { "eventApplicants": { userId, name, weight } } }),
+            db.collection("users").updateOne({ _id: new ObjectId(userId) },
+                { $push: { userSignedUpEvents: { eventId: new ObjectId(eventId), eventName, eventDate, accepted: false } } })
+
+        ])
+
+        if (queries[0].acknowledged == true && queries[1].acknowledged == true) {
+            return true
+        } else {
+            throw new Error("User not added to event")
+        }
+
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+
+const acceptOrRemoveApplicant = async (eventId: ObjectId, createdBy: ObjectId, applicantId: ObjectId, applicantName: string, boolean: boolean): Promise<boolean | undefined> => {
+    if (boolean == true) {
+        try {
+            const client = await clientPromise;
+            const db = client.db();
+
+            const query = await db.collection('events').updateOne({
+                _id: new ObjectId(eventId),
+                createdBy: new ObjectId(createdBy),
+                "weights.weight": 0
+            },
+                {
+                    $set: {
+                        "weights.$.spotsAvailable.$[el2]": {
+                            "name": applicantName,
+                            "userId": new ObjectId(applicantId)
+                        }
+                    }
+                },
+                {
+                    arrayFilters: [
+                        {
+                            "el2.userId": "empty"
+                        }
+                    ]
+                })
+
+            if (query) {
+                return true
+            } else {
+                throw new Error("User not added to event")
+            }
+
+        } catch (e) {
+            console.error(e);
+        }
+    } else if (boolean == false) {
+
+        try {
+            const client = await clientPromise;
+            const db = client.db();
+
+            const query = await db.collection('events').updateOne(
+                {
+                    _id: new ObjectId(eventId),
+                    createdBy: new ObjectId(createdBy),
+                },
+                { $pull: { eventApplicants: { userId: new ObjectId(applicantId) } } }
+            )
+
+            if (query) {
+                return true
+            } else {
+                throw new Error("User not removed from event")
+            }
+
+        } catch (e) {
+            console.error(e)
+        }
+    } else {
+        throw new Error("Boolean not true or false")
+    }
+}
 
 
 const dbMutations = {
-    createUser, createEvent, updateEvent, deleteEvent,
+    createUser, createEvent, updateEvent, deleteEvent, applyToEvent,
+    acceptOrRemoveApplicant,
 }
 
 export default dbMutations;
