@@ -17,15 +17,15 @@
       "@/utils/*": [
         "./utils/*"
       ],
-      "@lib/*": [
+      "@/lib/*": [
         "./lib/*"
       ],
-      "@gql": [
+      "@/gql/*": [
         "./gql/*"
       ],
-      "@types": [
+      "@/types/*": [
         "./types/*"
-      ]
+      ],
     },
     "target": "es5",
     "lib": [

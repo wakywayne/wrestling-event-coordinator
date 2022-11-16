@@ -53,7 +53,7 @@ export const authOptions = {
     secret: process.env.JWT_SECRET,
     // This is to make a custom sign in page
     pages: {
-        signIn: "/auth/signin",
+        signIn: "/wrestling-event-planner/login/signin",
         //     signOut: "/auth/signout",
     },
     // from here down is only needed if you need to store information besides name and email on the session via jwt 
