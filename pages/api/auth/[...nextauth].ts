@@ -1,11 +1,13 @@
 import NextAuth from "next-auth"
-import config from "@/config/index";
+import config, { db } from "@/config/index";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
+import dbQueries from "@/lib/queries";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
-import clientPromise from "@lib/mongodb";
+import clientPromise from "@/lib/mongodb";
 import { JWT } from "graphql-scalars/typings/mocks";
+import { ObjectId } from "mongodb";
 
 interface JwtDecoded {
     name?: string,
@@ -22,7 +24,8 @@ export interface TheFinalSession {
         image?: string
     },
     expires: string,
-    jwt: string
+    jwt: string,
+    availableWeights: []
 }
 
 
@@ -50,66 +53,62 @@ export const authOptions = {
         }),
     ],
     adapter: MongoDBAdapter(clientPromise),
-    secret: process.env.JWT_SECRET,
-    // This is to make a custom sign in page
+    secret: process.env.NEXTAUTH_SECRET,
+
+    // apparently this is not needed anymore????????
     pages: {
-        signIn: "/wrestling-event-planner/login/signin",
-        //     signOut: "/auth/signout",
+        signIn: '/login/signin',
+        // signOut: '/',
     },
-    // from here down is only needed if you need to store information besides name and email on the session via jwt 
-    // the following events occur in the order they are written 
+
+
     session: {
         strategy: "jwt",
     },
-    // set up jwt token
+
+
     jwt: {
-        secret: process.env.JWT_SECRET,
+        // if you definde the env variable you don't need to define the secret here
+        // secret: process.env.NEXTAUTH_SECRET,
+
         maxAge: 30 * 24 * 60 * 60, // 30 days
 
-        async encode({ token, secret }: { token: typeof JWT; secret: string }) {
-            const jwt = require("jsonwebtoken");
-            const encodedToken = jwt.sign(token, secret);
-            return encodedToken;
-        },
-        async decode({ token, secret }: { token: typeof JWT; secret: string }) {
-            const jwt = require("jsonwebtoken");
-            const decodedToken = jwt.verify(token, secret);
-            return decodedToken;
-        },
+        // async encode({ token, secret }: { token: typeof JWT; secret: string }) {
+        //     const jwt = require("jsonwebtoken");
+        //     const encodedToken = jwt.sign(token, secret);
+        //     return encodedToken;
+        // },
+        // async decode({ token, secret }: { token: typeof JWT; secret: string }) {
+        //     const jwt = require("jsonwebtoken");
+        //     const decodedToken = jwt.verify(token, secret);
+        //     return decodedToken;
+        // },
+
     },
 
     // This is for jwt stuff?
     callbacks: {
-        jwt: async ({ token, user }: { token: JwtDecoded; user: Object }) => {
-            // console.log({ jwt: token, user: Object });
-            if (token.sub) {
-                return token
-            } else {
-                return null
-            }
+        // async signIn({ user, account, profile, email, credentials }: { user: Object; account: Object; profile: Object; email: Object; credentials: Object }) {
+        //     return true
+        // },
 
+        // async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+        //     return baseUrl
+        // },
+        async jwt({ token, account, profile, session }: any) {
+            return token
         },
-        session: async ({ session, token }: { session: Omit<TheFinalSession, "jwt">; token: JwtDecoded }) => {
-            // console.log({ session, token });
-            const jwt = require("jsonwebtoken");
-            const safeJwt = jwt.sign(token, process.env.JWT_SECRET);
 
-            let finalSession = {}
+        async session({ session, token, user }: any) {
 
-            if (token.sub) {
-                finalSession = {
-                    ...session,
-                    jwt: safeJwt,
-                }
-            } else {
-                finalSession = {
-                    ...session,
-                    jwt: "",
-                }
-            }
-            // console.log({ theSession: session })
-            return finalSession as TheFinalSession;
+            const dbUser = await dbQueries.getUserById(new ObjectId(token.sub));
+
+            dbUser?.availableWeights ? session.user.availableWeights = dbUser.availableWeights : session.user.availableWeights = [];
+
+            return session
         },
+
+
     },
 }
 

@@ -9,10 +9,10 @@ import {
     Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant, Location, Empty
 } from 'gql';
 import axios from 'axios';
-// import { getSession } from 'next-auth/react';
 import { unstable_getServerSession } from "next-auth/next"
-import dbQueries from '@lib/queries';
-import dbMutations from '@lib/mutations';
+import { getToken } from 'next-auth/jwt';
+import dbQueries from '@/lib/queries';
+import dbMutations from '@/lib/mutations';
 import { errorIfPromiseFalse } from 'utils';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authOptions, TheFinalSession } from './auth/[...nextauth]';
@@ -667,17 +667,16 @@ export default createYoga<{
     schema,
     context: async ({ req, res }: { req: NextApiRequest; res: NextApiResponse }) => {
         // @ts-ignore
-        const session: TheFinalSession = await unstable_getServerSession(req, res, authOptions)
-        const jwt = require("jsonwebtoken");
+        // const session: TheFinalSession = await unstable_getServerSession(req, res, authOptions)
 
-        if (session) {
-            if (session.jwt) {
-                const decodedToken = jwt.verify(session.jwt, process.env.JWT_SECRET);
-                const user = await dbQueries.getUserById(decodedToken.sub);
-                return { currentUser: user }
-            } else {
-                return { currentUser: null }
-            }
+        const secret = process.env.NEXTAUTH_SECRET
+
+        const decodedToken = await getToken({ req, secret })
+
+
+        if (decodedToken) {
+            const user = await dbQueries.getUserById(new ObjectId(decodedToken.sub));
+            return { currentUser: user }
         } else {
             return { currentUser: null }
         }
