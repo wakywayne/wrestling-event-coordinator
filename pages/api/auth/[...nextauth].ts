@@ -1,4 +1,4 @@
-import NextAuth from "next-auth"
+import NextAuth, { NextAuthOptions } from "next-auth"
 import config, { db } from "@/config/index";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
@@ -17,19 +17,29 @@ interface JwtDecoded {
     iat: number,
 }
 
+interface SessionInterFace {
+    user: {
+        name?: string | null | undefined;
+        email?: string | null | undefined;
+        image?: string | null | undefined;
+        availableWeights?: number[] | null | undefined;
+    }
+    status: string;
+}
+
 export interface TheFinalSession {
     user: {
         name?: string,
         email: string,
         image?: string
+        availableWeights?: []
     },
     expires: string,
     jwt: string,
-    availableWeights: []
 }
 
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
     // Configure one or more authentication providers
     providers: [
         EmailProvider({
@@ -99,7 +109,7 @@ export const authOptions = {
             return token
         },
 
-        async session({ session, token, user }: any) {
+        async session({ session, token, user }) {
 
             const dbUser = await dbQueries.getUserById(new ObjectId(token.sub));
 
@@ -112,5 +122,5 @@ export const authOptions = {
     },
 }
 
-// @ts-ignore
+
 export default NextAuth(authOptions)

@@ -32,13 +32,13 @@ const Main: React.FC<Props> = () => {
                                             <span className="underline ">Click Here</span>
                                         </div>
                                     </Link> */}
-                                    <Link href="/login/signin?callbackUrl=/" className="inline m-2 mt-4 text-base border-2 rounded-full shadow-md lg:mt-2 border-myDarkRed bg-gradient-to-b from-myRed to-red-300 hover:pb-1 hover:border-0 hover:ring-2 hover:ring-black lg:text-lg">
+                                    <Link href="/events" className="inline m-2 mt-4 text-base border-2 rounded-full shadow-md lg:mt-2 border-myDarkRed bg-gradient-to-b from-myRed to-red-300 hover:pb-1 hover:border-0 hover:ring-2 hover:ring-black lg:text-lg">
                                         <div ><p>Continue as guest?</p>
                                             <span className="underline ">Click Here</span>
                                         </div>
                                     </Link>
 
-                                    <Link href="/login/signin?callbackUrl=/" className="inline m-2 text-base border-2 rounded-full shadow-md bg-gradient-to-b from-myGreen to-green-300 border-myDarkGreen hover:pb-1 hover:border-0 hover:ring-2 hover:ring-black myDarkBlue lg:text-lg">
+                                    <Link href="/login/signin?callbackUrl=/events" className="inline m-2 text-base border-2 rounded-full shadow-md bg-gradient-to-b from-myGreen to-green-300 border-myDarkGreen hover:pb-1 hover:border-0 hover:ring-2 hover:ring-black myDarkBlue lg:text-lg">
                                         <div ><p>Login/Sign Up</p>
                                             <span className="underline ">Click Here</span>
                                         </div>

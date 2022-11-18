@@ -31,14 +31,14 @@ const EventsLayout: React.FC<Props> = ({ children }) => {
                         <FaMapMarked className="mr-4 text-3xl lg:text-6xl " />
                         <span>View All Events Near You</span>
                     </Link>
-                    <div
+                    <Link href="/events/events-by-weight"
                         className="flex items-center px-2 py-2 mb-2 text-sm font-medium leading-5 text-gray-800 transition-colors duration-150 rounded-lg cursor-pointer hover:text-gray-800 hover:bg-gray-100">
                         {/* <IoScale className="mr-4 text-4xl text-myRed lg:text-7xl" /> */}
 
                         <IoScale className="mr-4 text-4xl cursor-pointer lg:text-7xl " />
                         <span>View Events With Your Weight Available</span>
-                    </div>
-                    <div
+                    </Link>
+                    <Link href="/events/events-by-weight-and-location"
                         className="flex items-center px-2 py-2 mb-2 text-sm font-medium leading-5 text-gray-800 transition-colors duration-150 rounded-lg cursor-pointer hover:text-gray-800 hover:bg-gray-100">
                         <div className="flex flex-col">
                             {/* <FaMapMarked className="mr-4 text-2xl lg:text-3xl text-myGreen" />
@@ -50,7 +50,7 @@ const EventsLayout: React.FC<Props> = ({ children }) => {
                         </div>
 
                         <span>View Events Near You With Weight Available</span>
-                    </div>
+                    </Link>
                 </div>
             </div>
             <div className='flex-grow '>

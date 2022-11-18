@@ -9,14 +9,11 @@ import {
     Event as EventType, weightsForEvent, spotsAvailableForEvent, applicant, Location, Empty
 } from 'gql';
 import axios from 'axios';
-import { unstable_getServerSession } from "next-auth/next"
 import { getToken } from 'next-auth/jwt';
 import dbQueries from '@/lib/queries';
 import dbMutations from '@/lib/mutations';
 import { errorIfPromiseFalse } from 'utils';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authOptions, TheFinalSession } from './auth/[...nextauth]';
-import { JSON } from 'graphql-scalars/typings/mocks';
 
 
 // Document Structure
