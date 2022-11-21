@@ -4,6 +4,7 @@ import { useQuery, gql } from '@apollo/client';
 import queries from '@/gql/queries';
 import { Event as EventType } from '@/gql/index';
 import LoadingEvents from '@/components/LoadingEvents';
+import Link from 'next/link';
 
 interface Props {
 
@@ -44,9 +45,9 @@ const EventPage: React.FC<Props> = () => {
                                 </div>
                             </div>
                             {/* create a red button */}
-                            <div className="flex justify-center mb-1">
-                                <button name={`${event._id}`} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">View Event</button>
-                            </div>
+                            <Link href={`single-event/${event._id}`} className="flex justify-center mb-1">
+                                <button name={`EventButtonFor:${event._id}`} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">View Event</button>
+                            </Link>
                         </div>
 
                     ))}
