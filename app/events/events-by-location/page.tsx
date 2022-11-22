@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useLazyQuery, gql } from '@apollo/client';
-import queries from '@/gql/queries';
 import { Event as EventType } from '@/gql/index';
 import LoadingEvents from '@/components/LoadingEvents';
 import Link from 'next/link';
@@ -98,7 +97,7 @@ const EventsByLocation: React.FC<Props> = () => {
     if (eventsSortedByCoordinates) {
         return (
             <>
-                <h1 className="mt-2 text-3xl text-center">Events Near You</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">Events Near You</h1>
                 <div className="grid grid-auto-fit">
                     {eventsSortedByCoordinates.map((event: EventType) => (
 
@@ -126,7 +125,7 @@ const EventsByLocation: React.FC<Props> = () => {
     } else if (loading || lazyLoading) {
         return (
             <>
-                <h1 className="mt-2 text-3xl text-center">Events Near You</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">Events Near You</h1>
                 <LoadingEvents />
                 {/* make a button that is absolutely positioned in the bottom right */}
 
@@ -136,7 +135,7 @@ const EventsByLocation: React.FC<Props> = () => {
         return (
             <>
                 <p>You did not give us location permissions you won&apos;t be able to use this feature. <strong>We are currently displaying all events</strong></p>
-                <h1 className="mt-2 text-3xl text-center">All Events</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">All Events</h1>
                 <div className="grid grid-auto-fit">
                     {data.events.map((event: EventType) => (
 

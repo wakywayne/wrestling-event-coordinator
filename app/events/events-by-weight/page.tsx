@@ -83,21 +83,21 @@ const EventsByWeights: React.FC<Props> = () => {
     if (!events && loading) {
         return (
             <>
-                <h1 className="mt-2 text-3xl text-center">Events By Weight</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">Events By Weight</h1>
                 <LoadingEvents />
             </>
         )
     } else if (error) {
         return (
             <>
-                <h1 className="mt-2 text-3xl text-center">Sorry there was an error loading events please click on events in the navigation menu</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">Sorry there was an error loading events please click on events in the navigation menu</h1>
 
             </>
         )
     } else {
         return (
             <>
-                <h1 className="mt-2 text-3xl text-center">Events By Weight</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">Events By Weight</h1>
                 {/* button */}
                 <div className="flex justify-around">
                     {/* create a select input with two options */}

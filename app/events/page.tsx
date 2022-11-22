@@ -1,17 +1,27 @@
-'use client'
-
-import { useQuery, gql } from '@apollo/client';
-import queries from '@/gql/queries';
 import { Event as EventType } from '@/gql/index';
 import LoadingEvents from '@/components/LoadingEvents';
 import Link from 'next/link';
+import WriteEventsCache from '@/gql/WriteEventsCache';
+// import dynamic from 'next/dynamic';
 
 interface Props {
 
 }
 
-const GET_EVENTS = gql`
-    query {
+// const DynamicWriteEventsCache = dynamic(() => import('@/gql/WriteEventsCache'), {
+//     ssr: false
+// })
+
+
+async function getEvents() {
+    const res = await fetch('http://localhost:3000/api', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            query: `
+         query Events {
     events {
     _id 
     createdBy
@@ -20,13 +30,27 @@ const GET_EVENTS = gql`
     description
         }
     }
-`;
+`
+        }),
+    });
 
-const EventPage: React.FC<Props> = () => {
+    if (!res.ok) {
+        throw new Error('Failed to fetch events');
+    }
 
-    const { loading, error, data } = useQuery(GET_EVENTS);
+    return await res.json();
+
+}
 
 
+export default async function EventPage() {
+
+
+    const { data } = await getEvents();
+
+
+
+    // @todo figure out if you can server render these and then pass all events into a client component that will add them to the apollo cache
 
     if (data) {
         return (
@@ -52,15 +76,19 @@ const EventPage: React.FC<Props> = () => {
 
                     ))}
                 </div>
+                {/* <DynamicWriteEventsCache events={data.events} /> */}
+                <WriteEventsCache events={data.events} />
             </>
         )
-    } else if (loading) {
-        return (
-            <>
-                <LoadingEvents />
-            </>
-        )
-    } else {
+    }
+    // else if (loading) {
+    //     return (
+    //         <>
+    //             <LoadingEvents />
+    //         </>
+    //     )
+    // } 
+    else {
         return (
             <>
                 <p>Sorry there seems to be an error getting the events, there might be no events for your criteria</p>
@@ -68,5 +96,3 @@ const EventPage: React.FC<Props> = () => {
         )
     }
 }
-
-export default EventPage;
