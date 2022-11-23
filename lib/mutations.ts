@@ -181,7 +181,7 @@ const createEvent = async (event: Omit<partialEvent, "_id" | "eventApplicants">)
 
 const updateEvent = async (createdBy: ObjectId, event: Omit<partialEvent, "createdBy">): Promise<Events | undefined> => {
 
-    // We don't want to repeate so we only pass createdBy once and use it here
+    // We don't want to repeat so we only pass createdBy once and use it here
     const eventWithCreatedBy: partialEvent = {
         ...event,
         createdBy
@@ -225,8 +225,7 @@ const updateEvent = async (createdBy: ObjectId, event: Omit<partialEvent, "creat
                 .collection("users")
                 .updateOne({ _id: new ObjectId(userId), "createdEvents.createdEventId": new ObjectId(_id) }, { $set: { "createdEvents.$": eventWithConfirmedProperId } });
             // return the created event's id
-            // db.users.updateOne({_id: ObjectId("63669a7fadb92eac2df57fc9"), "createdEvents.createdEventId": ObjectId('636877a65c6d7c7c098baf5b')}, 
-            // {$set: {"createdEvents.$":{name: "penis"}}})
+
 
             if (newEvent) {
                 return
@@ -303,7 +302,13 @@ const deleteEvent = async (eventId: ObjectId, userId: ObjectId) => {
         const queries = await Promise.all([
             db.collection("events").deleteOne({ _id: new ObjectId(eventId) }),
             db.collection("users").updateOne({ _id: new ObjectId(userId) },
-                { $pull: { createdEvents: { createdEventId: new ObjectId(eventId) } } })
+                { $pull: { createdEvents: { createdEventId: new ObjectId(eventId) } } }),
+            db.collection('users').updateMany(
+                { userSignedUpEvents: { $elemMatch: { eventId: new ObjectId(eventId) } } },
+                // @ts-ignore
+                // this code works fine but typescript doesn't like the $pull
+                { $pull: { userSignedUpEvents: { eventId: new ObjectId(eventId) } } },
+            )
         ])
 
 
@@ -413,6 +418,7 @@ const acceptOrRemoveApplicant = async (eventId: ObjectId, createdBy: ObjectId, a
         throw new Error("Boolean not true or false")
     }
 }
+
 
 
 const dbMutations = {
