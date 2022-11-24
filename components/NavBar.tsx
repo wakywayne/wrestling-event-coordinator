@@ -24,7 +24,7 @@ const NavBar: React.FC<Props> = () => {
                         </Link>
                     </div>
                     <div className='ml-auto '>
-                        <Link href="#"
+                        <Link href="/create-event"
                             className="inline-block px-4 py-2 text-sm leading-none text-white border border-white rounded hover:border-transparent hover:text-myLightBlue hover:bg-white lg:mt-0">
                             Create Event
                         </Link>

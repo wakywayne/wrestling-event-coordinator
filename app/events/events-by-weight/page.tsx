@@ -110,7 +110,7 @@ const EventsByWeights: React.FC<Props> = () => {
 
                         }
                     </select>
-                    <button onClick={() => getEventsByWeightOnChange(weight, undefined)} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">Get Events By Weight</button>
+                    <button onClick={() => getEventsByWeightOnChange(weight, undefined)} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">Search By Weight</button>
                 </div>
                 <div className="grid grid-auto-fit">
                     {events.map((event: EventType) => (
@@ -126,7 +126,7 @@ const EventsByWeights: React.FC<Props> = () => {
                                 </div>
                             </div>
                             {/* create a red button */}
-                            <Link href={`single-event/${event._id}`} className="flex justify-center mb-1">
+                            <Link href={`events/single-event/${event._id}`} className="flex justify-center mb-1">
                                 <button name={`EventButtonFor:${event._id}`} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">View Event</button>
                             </Link>
                         </div>

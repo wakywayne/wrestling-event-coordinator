@@ -91,9 +91,9 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
         return (
             // <div className='relative w-screen h-screen bg-gradient-to-b from-transparent to-green-300'>
             // @todo make this get the results passed down as props using layout I want this text to display right away this should be a server side render
-            <div className='relative w-screen h-screen '>
+            <div>
                 <h1 className='text-4xl font-bold text-center mt-7'>{event.name} Event</h1>
-                <div className='p-2 rounded absoluteCenter pattern'>
+                <div className='p-2 rounded pattern'>
                     <div className='flex flex-col items-center justify-center mt-6'>
 
                         {/*display the weights for the event */}
@@ -120,14 +120,14 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
                         <p className='my-1 text-xl'>Info: {event.description}</p>
                         {event.date && <p className='my-1 text-xl'>Date: {String(event.date)}</p>}
                         {event.cost && <p className='my-1 text-xl'>Cost: {event.cost}</p>}
-                        {event.link && < a href={`${event.link}`} className='my-1 text-xl underline text-myLightBlue'>Sign Up Link</a>}
+                        {event.link && < a href={`${event.link}`} className='my-1 text-xl underline text-myLightBlue'>More Info</a>}
                     </div>
                 </div>
-            </div >
+            </div>
         )
     } else if (loading) {
         return (
-            <div className='relative w-screen h-screen '>
+            <div className='relative h-screen '>
                 <div className="flex items-center justify-center mt-8 space-x-2">
                     <div role="status">
                         <svg className="inline w-8 h-8 mr-2 text-gray-200 animate-spin fill-myRed" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

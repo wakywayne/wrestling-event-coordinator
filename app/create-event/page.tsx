@@ -1,10 +1,13 @@
 'use client'
 
 import { useMutation, gql } from "@apollo/client";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AiFillInfoCircle } from 'react-icons/ai'
+import { BsX } from 'react-icons/bs'
 import { z } from "zod";
+import { cleanUndefinedOrNullKeys } from '@/utils/index'
 
 interface Props {
 
@@ -23,15 +26,13 @@ interface EventType {
 
 const CREATE_EVENT = gql`
 mutation CreateEvent($input: MutationCreateEventInput!){
-    createEvent(input:$input){
+  createEvent(input:$input){
         _id
         name
         description
         cost
         date
         link
-        latitude
-        longitude
     }
 }
 `;
@@ -67,51 +68,122 @@ const CreateEvent: React.FC<Props> = () => {
 
     const { register, control, reset, handleSubmit, formState: { errors } } = useForm<EventType>({ resolver: zodResolver(schema), defaultValues });
 
+    const [popUp, setPopUp] = useState(false);
+    const [success, setSuccess] = useState("0")
 
     const [createEvent, { loading, error }] = useMutation(CREATE_EVENT, {
         onCompleted: (data) => {
-            console.log(data);
-
+            setSuccess(`${data.createEvent._id}`);
         }
     });
 
-    // const [event, setEvent] = useState<EventType>({
-    //     cost: "",
-    //     date: String(new Date()),
-    //     description: "",
-    //     latitude: 0,
-    //     longitude: 0,
-    //     link: "",
-    //     name: ""
-    // });
+    useEffect(() => {
+        reset();
+
+        return () => {
+            setSuccess("0");
+        }
+    }, [success])
+
+
 
     function createEventClick(formValues: EventType) {
 
-        const { name, description, cost, date, link, latitude, longitude } = formValues;
+        const { name, description, cost, date, link, latitude, longitude, weights } = formValues;
 
-        // createEvent({
-        //     variables: {
-        //         input: {
-        //             cost: event.cost,
-        //             date: event.date,
-        //             description: event.description,
-        //             latitude: event.latitude,
-        //             longitude: event.longitude,
-        //             link: event.link,
-        //             name: event.name
-        //         }
+        let formattedDate = new Date(date).toISOString();
+
+
+
+        let cleanedFormValues = cleanUndefinedOrNullKeys<EventType>(
+            {
+                cost,
+                date: formattedDate,
+                description,
+                latitude,
+                longitude,
+                link,
+                name,
+                weights
+            }
+        )
+
+
+        // below we are transferring the array of numbers for weights into this format:
+        //          "weights": [
+        //     {
+        //         "weight": 0,
+        //         "spotsAvailable": [
+        //             {
+        //                 "userId": "empty",
+        //                 "name": "empty"
+        //             },
+        //             {
+        //                 "userId": "636c1778f1d09191074f9690",
+        //                 "name": "John"
+        //             }
+        //         ]
+        //     },
+        //     {
+        //         "weight": 1,
+        //         "spotsAvailable": [
+        //             {
+        //                 "userId": "empty",
+        //                 "name": "empty"
+        //             },
+        //         ]
         //     }
-        // })
-        console.log(formValues);
-        reset();
+        // ]
+
+
+        let representative: number[] = [];
+        let holder = {};
+
+        if (cleanedFormValues.weights) {
+
+
+            const newWeights = cleanedFormValues.weights.forEach((weight, index) => {
+
+                function pushToRepAndHolder(value: number) {
+                    representative.push(value);
+                    holder = {
+                        ...holder, [String(value)]: [{
+                            userId: "empty",
+                            name: "empty"
+                        }]
+                    }
+                }
+
+                const trueIfExists = representative.some((rep) => rep === weight) ? true : pushToRepAndHolder(weight);
+                if (trueIfExists) {
+
+                    console.log(holder)
+
+                    holder[weight].push({
+                        userId: "empty",
+                        name: "empty"
+                    })
+
+                }
+
+            }
+            )
+        }
+
+        const arrayFideObject = Object.entries(holder).map(([key, value]) => ({ weight: Number(key), spotsAvailable: value }))
+
+        console.log({ arrayFideObject })
+
+
+        createEvent({
+            variables: {
+                input: { ...cleanedFormValues, weights: arrayFideObject }
+
+            }
+        })
     }
 
-    // const onFormChange = (e: ChangeEvent<HTMLInputElement>) => {
-    //     setEvent({
-    //         ...event,
-    //         [e.target.name]: e.target.value
-    //     })
-    // }
+
 
 
     return (
@@ -149,7 +221,11 @@ const CreateEvent: React.FC<Props> = () => {
                     <div>{errors.longitude?.message}</div>
 
                     <label htmlFor="weights">Weights</label>
-                    <input type="text" {...register("weights", { setValueAs: (v: string) => v == "" ? undefined : v.split(",").map((weight) => Number(weight)) })} id="weights" className="rounded focus:outline-none focus:ring-1 focus:ring-myRed" />
+                    <input type="text" placeholder="103,113,120,126,132" {...register("weights", { setValueAs: (v: string) => v == "" ? undefined : v.split(",").map((weight) => Number(weight)) })} id="weights" className="rounded focus:outline-none focus:ring-1 focus:ring-myRed" />
+                    <AiFillInfoCircle className="inline ml-1" onMouseEnter={() => setPopUp(true)} onMouseLeave={() => setPopUp(false)} onClick={(e) => { e.stopPropagation(); setPopUp(true) }} />
+                    {/* make a pop up to display instructions */}
+                    {popUp && <div className="absolute z-10 p-2 bg-white border border-black rounded"><div className="flex justify-between"><span>Enter weights separated by commas</span> <BsX color="red" onClick={() => setPopUp(false)} /></div><span className="block text-sm text-ellipsis">to add multiple spots at the same weight just repeat the weight</span></div>}
+
                     <div>{errors.weights?.message}</div>
 
                     <div className="flex justify-center">
