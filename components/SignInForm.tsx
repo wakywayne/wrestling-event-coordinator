@@ -16,7 +16,6 @@ const SignInForm: React.FC<Props> = () => {
     const [email, setEmail] = useState('');
 
     const { data: session, status } = useSession();
-    console.log({ session, status });
     const providers = [
         {
             name: 'Google',

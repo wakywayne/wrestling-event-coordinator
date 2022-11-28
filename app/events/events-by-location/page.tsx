@@ -85,6 +85,7 @@ const EventsByLocation: React.FC<Props> = () => {
                 alert('You didn\'t allow location access, please allow location access to use this feature');
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rerunLocationPermissions]);
 
     // reset the users coordinates to the prompt state
@@ -96,12 +97,12 @@ const EventsByLocation: React.FC<Props> = () => {
     if (eventsSortedByCoordinates) {
         return (
             <>
-                <h1 className="mt-2 text-4xl font-bold text-center">Events Near You</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">Events Closest to You</h1>
                 <div className="grid grid-auto-fit">
                     {eventsSortedByCoordinates.map((event: EventType) => (
 
                         <div key={`mainEventSortedByLocation${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
-                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">Title</p>
+                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
                             <div className="flex justify-center rounded-t-lg ">
                                 <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
                                     <p className="my-1 text-sm">Location: </p>
@@ -124,7 +125,7 @@ const EventsByLocation: React.FC<Props> = () => {
     } else if (loading || lazyLoading) {
         return (
             <>
-                <h1 className="mt-2 text-4xl font-bold text-center">Events Near You</h1>
+                <h1 className="mt-2 text-4xl font-bold text-center">Events Closest to You</h1>
                 <LoadingEvents />
                 {/* make a button that is absolutely positioned in the bottom right */}
 
@@ -139,7 +140,7 @@ const EventsByLocation: React.FC<Props> = () => {
                     {data.events.map((event: EventType) => (
 
                         <div key={`mainEventWhenNoLocationGiven${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
-                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">Title</p>
+                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
                             <div className="flex justify-center rounded-t-lg ">
                                 <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
                                     <p className="my-1 text-sm">Location: </p>

@@ -59,7 +59,7 @@ export default async function EventPage() {
                     {data.events.map((event: EventType) => (
 
                         <div key={`mainEvent${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
-                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">Title</p>
+                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
                             <div className="flex justify-center rounded-t-lg ">
                                 <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
                                     <p className="my-1 text-sm">Location: </p>

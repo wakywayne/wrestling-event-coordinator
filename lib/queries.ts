@@ -9,7 +9,6 @@ const getUsers = async (): Promise<User[] | undefined> => {
 
         const users = await client.db().collection("users").find({}).limit(50).toArray();
 
-        console.log(users)
 
         if (users) {
             return users as User[];
@@ -32,6 +31,7 @@ const getUserById = async (id: ObjectId): Promise<User | undefined> => {
         const user = await db
             .collection("users")
             .findOne({ _id: mongId });
+
 
         if (user) {
             return user as User;

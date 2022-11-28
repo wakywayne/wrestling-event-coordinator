@@ -62,15 +62,6 @@ const EventsByWeights: React.FC<Props> = () => {
 
 
 
-    useEffect(() => {
-        if (data) {
-            setEvents(data.events)
-        } else {
-            return
-        }
-    }, [data])
-
-
     const getEventsByWeightOnChange = (weight: number | undefined, plusOrMinus?: number,) => {
         if (weight) {
             getEventsByWeight({ variables: { plusOrMinus, weight } })
@@ -94,11 +85,49 @@ const EventsByWeights: React.FC<Props> = () => {
 
             </>
         )
-    } else {
+    } else if (Array.isArray(events) && events.length !== 0) {
         return (
             <>
                 <h1 className="mt-2 text-4xl font-bold text-center">Events By Weight</h1>
                 {/* button */}
+                <div>
+                    <div className="flex justify-around">
+                        {/* create a select input with two options */}
+                        <select className="w-1/2 p-2 my-2 text-sm font-semibold text-black bg-gray-400 rounded-sm" onChange={(e) => setWeight(parseInt(e.target.value))}>
+                            session?.user?.availableWeights ? <option value={undefined}>Select a weight</option> :null
+                            {
+                                session?.user?.availableWeights ? session.user.availableWeights.map((weight: number) => (
+                                    <option key={`weight${weight}`} value={weight}>{weight}</option>
+                                )) : <option value={undefined}>You need to be logged in to use this feature</option>
+                            }
+                        </select>
+                        <button onClick={() => getEventsByWeightOnChange(weight, undefined)} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">Search By Weight</button>
+                    </div>
+                    <div className="grid grid-auto-fit">
+                        {events.map((event: EventType) => (
+                            <div key={`mainEventByWeight${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
+                                <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
+                                <div className="flex justify-center rounded-t-lg ">
+                                    <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
+                                        <p className="my-1 text-sm">Location: </p>
+                                        {/* @ts-ignore */}
+                                        <p className="my-1 text-sm">Date: {event.date}</p>
+                                        <p className="my-1 text-sm">Description: {event.description}</p>
+                                    </div>
+                                </div>
+                                {/* create a red button */}
+                                <Link href={`events/single-event/${event._id}`} className="flex justify-center mb-1">
+                                    <button name={`EventButtonFor:${event._id}`} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">View Event</button>
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </>
+        )
+    } else {
+        return (
+            <>
                 <div className="flex justify-around">
                     {/* create a select input with two options */}
                     <select className="w-1/2 p-2 my-2 text-sm font-semibold text-black bg-gray-400 rounded-sm" onChange={(e) => setWeight(parseInt(e.target.value))}>
@@ -107,31 +136,9 @@ const EventsByWeights: React.FC<Props> = () => {
                             session?.user?.availableWeights ? session.user.availableWeights.map((weight: number) => (
                                 <option key={`weight${weight}`} value={weight}>{weight}</option>
                             )) : <option value={undefined}>You need to be logged in to use this feature</option>
-
                         }
                     </select>
                     <button onClick={() => getEventsByWeightOnChange(weight, undefined)} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">Search By Weight</button>
-                </div>
-                <div className="grid grid-auto-fit">
-                    {events.map((event: EventType) => (
-
-                        <div key={`mainEventByWeight${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
-                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">Title</p>
-                            <div className="flex justify-center rounded-t-lg ">
-                                <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
-                                    <p className="my-1 text-sm">Location: </p>
-                                    {/* @ts-ignore */}
-                                    <p className="my-1 text-sm">Date: {event.date}</p>
-                                    <p className="my-1 text-sm">Description: {event.description}</p>
-                                </div>
-                            </div>
-                            {/* create a red button */}
-                            <Link href={`events/single-event/${event._id}`} className="flex justify-center mb-1">
-                                <button name={`EventButtonFor:${event._id}`} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">View Event</button>
-                            </Link>
-                        </div>
-
-                    ))}
                 </div>
             </>
         )

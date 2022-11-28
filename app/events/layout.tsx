@@ -6,17 +6,13 @@ interface Props {
     children: React.ReactNode;
 }
 
-// I think what we need to do is have this component only be the filter which will have next links that 
-// Are going to redirect us to 3 different pages for the three different filters 
-// We might need to add a filler item that will hold up the space behind the filter
-// So this component will not be a grid the different routes will be a grid
 
 const EventsLayout: React.FC<Props> = ({ children }) => {
     return (
         <>
 
-            <div className="flex flex-col w-screen h-screen lg:flex-row">
-                <div className="flex flex-row py-4 text-black rounded-br-lg shadow-sm lg:w-3/12 2xl:w-4/12 bg-gradient-to-tl from-slate-400 to-slate-300 lg:h-full mt-18 lg:flex-col ">
+            <div className="flex flex-col myContainer lg:flex-row">
+                <div className="flex flex-row py-4 text-black rounded-br-lg shadow-sm lg:w-3/12 3xl:w-4/12 bg-gradient-to-tl from-slate-400 to-slate-300 mt-18 lg:flex-col ">
                     {/* <div className="flex flex-row h-20 py-4 text-black align-middle rounded-br-lg shadow-sm bg-gradient-radial from-slate-400 to-slate-300 lg:h-full mt-18 lg:flex-col "> */}
                     {/* <div className="flex flex-row h-20 py-4 text-black align-middle rounded-br-lg shadow-sm bg-gradient-radial from-green-700 to-green-500 lg:h-full mt-18 lg:flex-col "> */}
                     {/* sidebar header */}
@@ -30,7 +26,7 @@ const EventsLayout: React.FC<Props> = ({ children }) => {
                             className="flex items-center px-2 py-2 mb-2 text-sm font-medium leading-5 text-gray-800 transition-colors duration-150 rounded-lg cursor-pointer hover:text-gray-800 hover:bg-gray-100">
                             {/* <FaMapMarked className='mr-4 text-4xl lg:text-6x text-myGreen' /> */}
                             <FaMapMarked className="mr-4 text-3xl lg:text-6xl " />
-                            <span>View All Events Near You</span>
+                            <span>View All Events Closest to You</span>
                         </Link>
                         <Link href="/events/events-by-weight"
                             className="flex items-center px-2 py-2 mb-2 text-sm font-medium leading-5 text-gray-800 transition-colors duration-150 rounded-lg cursor-pointer hover:text-gray-800 hover:bg-gray-100">
@@ -50,7 +46,7 @@ const EventsLayout: React.FC<Props> = ({ children }) => {
 
                             </div>
 
-                            <span>View Events Near You With Weight Available</span>
+                            <span>View Events Closest to You With Weight Available</span>
                         </Link>
                     </div>
                 </div>

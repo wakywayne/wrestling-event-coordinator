@@ -7,7 +7,7 @@ interface Props {
 const NavBar: React.FC<Props> = () => {
     return (
         <>
-            <nav className="relative z-10 flex items-center w-screen p-6 bg-black h-nav md:justify-between">
+            <nav className="relative z-10 flex items-center w-screen p-6 bg-black h-mobileNav lg:h-nav md:justify-between">
                 <div className="flex items-center flex-shrink-0 mr-6 text-white">
                     <span className="text-xl font-semibold tracking-tight">Logo</span>
                 </div>
@@ -19,7 +19,7 @@ const NavBar: React.FC<Props> = () => {
                         <Link href="/events" className="block mr-4 text-white hover:text-myLightBlue lg:inline-block lg:mt-0">
                             Find Events
                         </Link>
-                        <Link href="#responsive-header" className="block text-white hover:text-myLightBlue lg:inline-block lg:mt-0">
+                        <Link href="/profile" className="block text-white hover:text-myLightBlue lg:inline-block lg:mt-0">
                             Profile
                         </Link>
                     </div>

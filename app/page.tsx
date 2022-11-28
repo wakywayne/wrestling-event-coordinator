@@ -13,7 +13,7 @@ const Main: React.FC<Props> = () => {
     return (
         <>
 
-            <div className="h-screen ">
+            <div className="myContainer ">
                 {/* Make a card that is centered absolutely and asks if the user wants  */}
                 <div className="flex justify-center">
                     <div className="z-10 w-3/4 mt-12 border-2 border-solid rounded-lg shadow-xl bg-slate-300 border-slate-800">

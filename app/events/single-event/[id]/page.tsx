@@ -59,7 +59,6 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
 
     function applyForWeightClick(weight: number) {
 
-        console.log({ data })
 
         let input = {
             eventDate: data.eventById.date,
@@ -89,7 +88,7 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
         const event: EventType = data.eventById;
 
         return (
-            // <div className='relative w-screen h-screen bg-gradient-to-b from-transparent to-green-300'>
+            // <div className='relative w-screen myContainer bg-gradient-to-b from-transparent to-green-300'>
             // @todo make this get the results passed down as props using layout I want this text to display right away this should be a server side render
             <div>
                 <h1 className='text-4xl font-bold text-center mt-7'>{event.name} Event</h1>
@@ -127,7 +126,7 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
         )
     } else if (loading) {
         return (
-            <div className='relative h-screen '>
+            <div className='relative myContainer '>
                 <div className="flex items-center justify-center mt-8 space-x-2">
                     <div role="status">
                         <svg className="inline w-8 h-8 mr-2 text-gray-200 animate-spin fill-myRed" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -141,7 +140,7 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
         )
     } else {
         return (
-            <div className='h-screen '>
+            <div className='myContainer '>
                 <div>
                     <p className='text-4xl font-bold text-center'>Single Event Page</p>
                     <p className='text-2xl font-bold text-center'>Error</p>

@@ -519,7 +519,6 @@ builder.queryType({
                 resolve: async (parent, { email }, context) => {
 
                     const user = await dbMutations.createUser({ email })
-                    console.log(user)
                     return user;
                 }
             }),
@@ -666,14 +665,17 @@ export default createYoga<{
         // @ts-ignore
         // const session: TheFinalSession = await unstable_getServerSession(req, res, authOptions)
 
+
+
         const secret = process.env.NEXTAUTH_SECRET
 
         const decodedToken = await getToken({ req, secret })
 
-
         if (decodedToken) {
-            const user = await dbQueries.getUserById(new ObjectId(decodedToken.sub));
-            return { currentUser: user }
+            return {
+                ...initContextCache(),
+                currentUser: await dbQueries.getUserById(new ObjectId(decodedToken.sub))
+            }
         } else {
             return { currentUser: null }
         }

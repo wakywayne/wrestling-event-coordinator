@@ -128,6 +128,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
                 alert('You didn\'t allow location access, please allow location access to use this feature');
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rerunLocationPermissions]);
 
 
@@ -143,7 +144,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
     if (eventsSortedByCoordinates && !finalEvents) {
         return (
             <>
-                <h1 className="my-6 text-4xl font-bold text-center">Events Near You With Weight Filter</h1>
+                <h1 className="my-6 text-4xl font-bold text-center">Events Closest to You With Weight Filter</h1>
                 <div className="flex justify-around">
                     {/* create a select input with two options */}
                     <select className="w-1/2 p-2 my-2 text-sm font-semibold text-black bg-gray-400 rounded-sm" onChange={(e) => setWeight(parseInt(e.target.value))}>
@@ -161,7 +162,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
                     {eventsSortedByCoordinates.map((event: EventType) => (
 
                         <div key={`mainEventSortedByLocation${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
-                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">Title</p>
+                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
                             <div className="flex justify-center rounded-t-lg ">
                                 <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
                                     <p className="my-1 text-sm">Location: </p>
@@ -184,7 +185,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
     } else if (finalEvents) {
         return (
             <>
-                <h1 className="my-6 text-4xl font-bold text-center">Events Near You With Weight Filter</h1>
+                <h1 className="my-6 text-4xl font-bold text-center">Events Closest to You With Weight Filter</h1>
                 <div className="flex justify-around">
                     {/* create a select input with two options */}
                     <select className="w-1/2 p-2 my-2 text-sm font-semibold text-black bg-gray-400 rounded-sm" onChange={(e) => setWeight(parseInt(e.target.value))}>
@@ -202,7 +203,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
                     {finalEvents.map((event: EventType) => (
 
                         <div key={`mainEventSortedByLocation${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
-                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">Title</p>
+                            <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
                             <div className="flex justify-center rounded-t-lg ">
                                 <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
                                     <p className="my-1 text-sm">Location: </p>
@@ -224,7 +225,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
     } else if (loading || lazyLoading) {
         return (
             <>
-                <h1 className="mt-6 text-4xl font-bold text-center">Events Near You</h1>
+                <h1 className="mt-6 text-4xl font-bold text-center">Events Closest to You</h1>
                 <LoadingEvents />
                 {/* make a button that is absolutely positioned in the bottom right */}
 

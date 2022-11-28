@@ -304,10 +304,10 @@ const deleteEvent = async (eventId: ObjectId, userId: ObjectId) => {
             db.collection("users").updateOne({ _id: new ObjectId(userId) },
                 { $pull: { createdEvents: { createdEventId: new ObjectId(eventId) } } }),
             db.collection('users').updateMany(
-                { userSignedUpEvents: { $elemMatch: { eventId: new ObjectId(eventId) } } },
+                { signedUpEvents: { $elemMatch: { eventId: new ObjectId(eventId) } } },
                 // @ts-ignore
                 // this code works fine but typescript doesn't like the $pull
-                { $pull: { userSignedUpEvents: { eventId: new ObjectId(eventId) } } },
+                { $pull: { signedUpEvents: { eventId: new ObjectId(eventId) } } },
             )
         ])
 
@@ -339,7 +339,7 @@ const applyToEvent = async (userId: ObjectId, name: string, weight: number, even
         const queries = await Promise.all([
             db.collection("events").updateOne({ _id: new ObjectId(eventId), }, { $push: { "eventApplicants": { userId, name, weight } } }),
             db.collection("users").updateOne({ _id: new ObjectId(userId) },
-                { $push: { userSignedUpEvents: { eventId: new ObjectId(eventId), eventName, eventDate, accepted: false } } })
+                { $push: { signedUpEvents: { eventId: new ObjectId(eventId), eventName, eventDate, accepted: false } } })
 
         ])
 

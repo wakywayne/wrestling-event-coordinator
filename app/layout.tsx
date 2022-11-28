@@ -21,7 +21,7 @@ const RootLayout: React.FC<Props> = ({ children }) => {
     return (
         <html lang="en" className={`${poppins.variable} ${inter.className} p-0 m-0`}>
             <AuthContext>
-                <body className='flex flex-col h-screen p-0 m-0 debug-screens' >
+                <body className='flex flex-col myContainer p-0 m-0 debug-screens' >
 
                     <div className="relative flex-grow bg-gradient-to-b from-white to-gray-300">
                         {/* <div className="relative flex-grow bg-gradient-to-b from-white to-gray-900"> */}

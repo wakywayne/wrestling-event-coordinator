@@ -142,7 +142,7 @@ const CreateEvent: React.FC<Props> = () => {
         if (cleanedFormValues.weights) {
 
 
-            const newWeights = cleanedFormValues.weights.forEach((weight, index) => {
+            cleanedFormValues.weights.forEach((weight, index) => {
 
                 function pushToRepAndHolder(value: number) {
                     representative.push(value);
@@ -157,7 +157,8 @@ const CreateEvent: React.FC<Props> = () => {
                 const trueIfExists = representative.some((rep) => rep === weight) ? true : pushToRepAndHolder(weight);
                 if (trueIfExists) {
 
-                    console.log(holder)
+                    // @ts-ignore
+                    // You need to define the types of the keys here I am pretty sure
 
                     holder[weight].push({
                         userId: "empty",
@@ -172,7 +173,6 @@ const CreateEvent: React.FC<Props> = () => {
 
         const arrayFideObject = Object.entries(holder).map(([key, value]) => ({ weight: Number(key), spotsAvailable: value }))
 
-        console.log({ arrayFideObject })
 
 
         createEvent({
@@ -187,7 +187,7 @@ const CreateEvent: React.FC<Props> = () => {
 
 
     return (
-        <div className="h-screen ">
+        <div className="myContainer ">
             <h1 className="my-4 text-3xl text-center">Create Event</h1>
 
             <div className="flex justify-center">
