@@ -66,6 +66,7 @@ const SettingPage: React.FC<Props> = () => {
             });
         }
         return
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
     // End of setting up the form
 
@@ -86,16 +87,22 @@ const SettingPage: React.FC<Props> = () => {
     if (data) {
 
         return (
-            <div className='flex justify-center'>
-                <form onSubmit={handleSubmit(formFunction)} className="[&>input]:mb-4  [&>label]:mr-2">
-                    <label>Name</label>
-                    <input type="text" {...register("name")} />
+            <div className='flex myContainerFixed'>
+                <form onSubmit={handleSubmit(formFunction)} className=" bg-slate-300 shadow-xl  w-2/3 p-2 mx-auto mb-auto mt-12 lg:my-auto rounded-sm [&>label]:mr-2">
+                    <div className="flex justify-center mb-4">
+                        <label className='grow'>Name</label>
+                        <input className="focus:outline-none grow-3 focus:ring-1 focus:ring-myRed" type="text" {...register("name")} />
+                    </div>
                     <div className='italic text-myDarkRed'>{errors.name?.message}</div>
-                    <label>Email</label>
-                    <input type="email" {...register("email")} />
+                    <div className="flex justify-center mb-4">
+                        <label className='grow'>Email</label>
+                        <input className="focus:outline-none grow-3 focus:ring-1 focus:ring-myRed" type="email" {...register("email")} />
+                    </div>
                     <div className='italic text-myDarkRed'>{errors.email?.message}</div>
-                    <label>Available Weights</label>
-                    <input type="text" {...register("availableWeights", { setValueAs: (v: string | Array<number>) => Array.isArray(v) ? arrayToString(v) : v.split(",").map((weight) => Number(weight)) })} />
+                    <div className="flex justify-center mb-4">
+                        <label className=' grow'>Available Weights</label>
+                        <input className="focus:outline-none grow-3 focus:ring-1 focus:ring-myRed" type="text" {...register("availableWeights", { setValueAs: (v: string | Array<number>) => Array.isArray(v) ? v : v.split(",").map((weight) => Number(weight)) })} />
+                    </div>
                     {/*  */}
                     <div className='italic text-myDarkRed'>{errors.availableWeights?.message}</div>
 

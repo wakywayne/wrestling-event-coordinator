@@ -11,7 +11,10 @@ module.exports = {
       position: ["top", "left"],
     },
     extend: {
-
+      flexGrow: {
+        '2': 2,
+        '3': 3,
+      },
       height: {
         nav: '15vh',
         mobileNav: '10vh',
@@ -40,6 +43,12 @@ module.exports = {
         minHeight: "90vh",
         "@screen lg": {
           minHeight: "85vh",
+        },
+      },
+      ".myContainerFixed": {
+        height: "90vh",
+        "@screen lg": {
+          height: "85vh",
         },
       },
     });

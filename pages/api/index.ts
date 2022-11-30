@@ -507,21 +507,21 @@ builder.queryType({
     builder.mutationType({
         fields: (t) => ({
 
-            // Logged In user EventMutations Below
+            // EventMutations Below
             // ------------------------------------
 
             // Create a user we don't use this I will remove before prod
-            createUser: t.field({
-                args: {
-                    email: t.arg({ type: 'String', required: true }),
-                },
-                type: 'mongoId',
-                resolve: async (parent, { email }, context) => {
+            // createUser: t.field({
+            //     args: {
+            //         email: t.arg({ type: 'String', required: true }),
+            //     },
+            //     type: 'mongoId',
+            //     resolve: async (parent, { email }, context) => {
 
-                    const user = await dbMutations.createUser({ email })
-                    return user;
-                }
-            }),
+            //         const user = await dbMutations.createUser({ email })
+            //         return user;
+            //     }
+            // }),
 
             // Creating an event
             createEvent: t.fieldWithInput({
@@ -637,6 +637,24 @@ builder.queryType({
                         } else {
                             return new Error('You are not the creator of this event')
                         }
+                    } catch (err) {
+                        console.log(err)
+                    }
+                }
+            }),
+
+            updateUserSettings: t.fieldWithInput({
+                input: {
+                    name: t.input.string({ required: true }),
+                    email: t.input.string({ required: true }),
+                    weights: t.input.intList({ required: true }),
+                },
+                type: User,
+                resolve: async (parent, { input: { name, email, weights } }, context) => {
+                    try {
+                        console.log({ name, email, weights })
+                        let user;
+                        return user as User
                     } catch (err) {
                         console.log(err)
                     }

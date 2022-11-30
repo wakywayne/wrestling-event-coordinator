@@ -83,6 +83,7 @@ const CreateEvent: React.FC<Props> = () => {
         return () => {
             setSuccess("0");
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [success])
 
 

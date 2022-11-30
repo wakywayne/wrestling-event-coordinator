@@ -16,10 +16,8 @@ const EventsLayout = async ({ children }: { children: ReactElement }) => {
 
     return (
         <>
-            <div className="flex flex-col w-screen myContainer lg:flex-row">
-                <div className="flex flex-row py-4 text-black rounded-br-lg shadow-sm myContainer lg:w-3/12 3xl:w-4/12 bg-gradient-to-tl from-myGreen to-green-300 lg:h-full mt-18 lg:flex-col ">
-                    {/* <div className="flex flex-row h-20 py-4 text-black align-middle rounded-br-lg shadow-sm bg-gradient-radial from-slate-400 to-slate-300 lg:h-full mt-18 lg:flex-col "> */}
-                    {/* <div className="flex flex-row h-20 py-4 text-black align-middle rounded-br-lg shadow-sm bg-gradient-radial from-green-700 to-green-500 lg:h-full mt-18 lg:flex-col "> */}
+            <div className="flex flex-col myContainer lg:flex-row">
+                <div className="flex flex-row py-4 text-black rounded-br-lg shadow-sm lg:w-3/12 3xl:w-4/12 bg-gradient-to-tl from-myGreen to-green-300 mt-18 lg:flex-col ">
                     {/* sidebar header */}
                     {/* sidebar links */}
                     <div className="flex flex-row flex-1 mx-8 lg:flex-col">
@@ -42,7 +40,7 @@ const EventsLayout = async ({ children }: { children: ReactElement }) => {
                     </div>
                 </div>
 
-                <div className='flex-grow'>
+                <div className='flex-grow '>
                     {children}
                 </div>
             </div>

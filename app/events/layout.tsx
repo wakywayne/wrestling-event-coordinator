@@ -13,8 +13,6 @@ const EventsLayout: React.FC<Props> = ({ children }) => {
 
             <div className="flex flex-col myContainer lg:flex-row">
                 <div className="flex flex-row py-4 text-black rounded-br-lg shadow-sm lg:w-3/12 3xl:w-4/12 bg-gradient-to-tl from-slate-400 to-slate-300 mt-18 lg:flex-col ">
-                    {/* <div className="flex flex-row h-20 py-4 text-black align-middle rounded-br-lg shadow-sm bg-gradient-radial from-slate-400 to-slate-300 lg:h-full mt-18 lg:flex-col "> */}
-                    {/* <div className="flex flex-row h-20 py-4 text-black align-middle rounded-br-lg shadow-sm bg-gradient-radial from-green-700 to-green-500 lg:h-full mt-18 lg:flex-col "> */}
                     {/* sidebar header */}
                     <div className='hidden lg:block'>
                         <span className="mx-8 text-xl font-semibold tracking-tight underline lg:ml-2">Filters</span>
