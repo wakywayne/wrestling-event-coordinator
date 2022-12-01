@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, useMutation, gql } from '@apollo/client';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,9 +12,17 @@ query GetUserById {
             email
             availableWeights
         }
-    }
-    
-    
+    }    
+`;
+
+const UPDATE = gql`
+mutation UpdateUserSettings($input: MutationUpdateUserSettingsInput!){
+  updateUserSettings(input:$input){
+    name
+    email
+    availableWeights
+  }
+}
 `;
 
 interface Props {
@@ -30,6 +38,9 @@ const SettingPage: React.FC<Props> = () => {
 
 
     const { loading, error, data } = useQuery(USER_QUERY);
+    const [updateMutation, { loading: loadingUpdate, error: errorUpdate, data: dataUpdate }] = useMutation(UPDATE, {
+        refetchQueries: [{ query: USER_QUERY }]
+    });
 
 
     // Start of setting up the form
@@ -51,10 +62,10 @@ const SettingPage: React.FC<Props> = () => {
 
     const { register, control, reset, handleSubmit, formState: { errors } } = useForm<formType>({ resolver: zodResolver(schema), defaultValues });
 
-    function formFunction(formValues: formType) {
-        let { name, email, availableWeights } = formValues;
+    async function formFunction(formValues: formType) {
+        let { name, availableWeights } = formValues;
+        await updateMutation({ variables: { input: { name, availableWeights } } });
 
-        console.log(formValues);
     }
 
     useEffect(() => {
@@ -64,6 +75,12 @@ const SettingPage: React.FC<Props> = () => {
                 email: data?.userById.email,
                 availableWeights: data?.userById.availableWeights
             });
+        }
+        if (dataUpdate) {
+            alert("Settings updated");
+        }
+        if (errorUpdate) {
+            alert("Error updating settings");
         }
         return
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,24 +106,24 @@ const SettingPage: React.FC<Props> = () => {
         return (
             <div className='flex myContainerFixed'>
                 <form onSubmit={handleSubmit(formFunction)} className=" bg-slate-300 shadow-xl  w-2/3 p-2 mx-auto mb-auto mt-12 lg:my-auto rounded-sm [&>label]:mr-2">
-                    <div className="flex justify-center mb-4">
+                    <div className="flex justify-center ">
                         <label className='grow'>Name</label>
                         <input className="focus:outline-none grow-3 focus:ring-1 focus:ring-myRed" type="text" {...register("name")} />
                     </div>
                     <div className='italic text-myDarkRed'>{errors.name?.message}</div>
-                    <div className="flex justify-center mb-4">
+                    <div className="flex justify-center mt-4">
                         <label className='grow'>Email</label>
-                        <input className="focus:outline-none grow-3 focus:ring-1 focus:ring-myRed" type="email" {...register("email")} />
+                        <input disabled className="focus:outline-none grow-3 focus:ring-1 focus:ring-myRed" type="email" {...register("email")} />
                     </div>
-                    <div className='italic text-myDarkRed'>{errors.email?.message}</div>
-                    <div className="flex justify-center mb-4">
+                    <div className='italic text-myDarkRed'>Can&apos;t change email yet {errors.email?.message}</div>
+                    <div className="flex justify-center mt-4">
                         <label className=' grow'>Available Weights</label>
                         <input className="focus:outline-none grow-3 focus:ring-1 focus:ring-myRed" type="text" {...register("availableWeights", { setValueAs: (v: string | Array<number>) => Array.isArray(v) ? v : v.split(",").map((weight) => Number(weight)) })} />
                     </div>
                     {/*  */}
                     <div className='italic text-myDarkRed'>{errors.availableWeights?.message}</div>
 
-                    <button type="submit" className="p-2 rounded shadow-sm bg-gradient-to-b from-myRed to-red-400">Submit</button>
+                    <button type="submit" className="p-2 mt-3 rounded shadow-sm bg-gradient-to-b from-myRed to-red-400">Submit</button>
                 </form>
             </div>
         );

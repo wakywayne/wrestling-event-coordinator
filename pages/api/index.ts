@@ -567,7 +567,7 @@ builder.queryType({
                 },
                 type: EventType,
                 resolve: (_, { input: { _id, longitude, latitude, name, date, description, cost, link, weights, } }, context) => {
-
+                    // error has to do with the updateUserSettings email not exstisting it goes off randomly might be a bug ignore it 
 
                     const location: Location = {
                         type: 'Point',
@@ -646,15 +646,13 @@ builder.queryType({
             updateUserSettings: t.fieldWithInput({
                 input: {
                     name: t.input.string({ required: true }),
-                    email: t.input.string({ required: true }),
-                    weights: t.input.intList({ required: true }),
+                    // email: t.input.string({ required: true }),
+                    availableWeights: t.input.floatList({ required: true }),
                 },
                 type: User,
-                resolve: async (parent, { input: { name, email, weights } }, context) => {
+                resolve: async (parent, { input: { name, availableWeights } }, context) => {
                     try {
-                        console.log({ name, email, weights })
-                        let user;
-                        return user as User
+                        return await errorIfPromiseFalse(dbMutations.updateUserSettings(context.currentUser._id, name, context.currentUser.email, availableWeights), 'Error updating user settings')
                     } catch (err) {
                         console.log(err)
                     }

@@ -420,10 +420,34 @@ const acceptOrRemoveApplicant = async (eventId: ObjectId, createdBy: ObjectId, a
 }
 
 
+const updateUserSettings = async (_id: ObjectId, name: string, email: string, availableWeights: number[]): Promise<User | undefined> => {
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+
+        const query = await db.collection('users').updateOne({ _id: new ObjectId(_id) }, { $set: { name, email, availableWeights } })
+
+        if (query) {
+            return {
+                _id,
+                name,
+                email,
+                availableWeights
+            }
+        } else {
+            throw new Error("Settings not updated")
+        }
+
+    }
+    catch (e) {
+        console.error(e);
+    }
+}
+
 
 const dbMutations = {
     createUser, createEvent, updateEvent, deleteEvent, applyToEvent,
-    acceptOrRemoveApplicant,
+    acceptOrRemoveApplicant, updateUserSettings
 }
 
 export default dbMutations;
