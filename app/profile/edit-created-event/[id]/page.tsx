@@ -1,5 +1,6 @@
 'use client'
 
+import { Event as EventType } from '@/gql/index';
 import { useQuery, gql } from '@apollo/client';
 import { BsPencilSquare } from 'react-icons/bs';
 
@@ -72,8 +73,9 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
                         <p className='my-1 text-xl '>{data.eventById.link}</p>
                         <p className='my-1 text-xl '>{data.eventById.location.coordinates}</p>
                         <p className='my-1 text-xl '>{data.eventById.eventApplicants.name}</p>
-                        <p className='my-1 text-xl '>{data.eventById.eventApplicants.userId}</p>
-                        <p className='my-1 text-xl '>{data.eventById.eventApplicants.weight}</p>
+                        <div>
+                            data.event
+                        </div>
                         <p className='my-1 text-xl '>{data.eventById.weights.weight}</p>
                         {/* <p>{data.eventById.weights.spotsAvailable.name}</p> */}
                         {/* <p>{data.eventById.weights.spotsAvailable.userId}</p> */}
@@ -82,7 +84,7 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
                     {/* make a small button */}
                 </div>
             </div>
-            <button className='absolute top-0 flex p-2 text-xs text-white rounded-lg bg-myRed hover:bg-myRed-600 right-3 hover:cursor-pointer myFocus:ring-2 ring-red-300'><span className='mr-1 '>Edit</span> <BsPencilSquare /></button>
+            <button className='absolute top-0 flex p-2 text-xs text-white rounded-lg bg-myRed hover:bg-red-700 right-3 hover:cursor-pointer myFocus:ring-4 ring-red-300'><span className='mr-1 '>Edit</span> <BsPencilSquare /></button>
         </div>
     );
 }
