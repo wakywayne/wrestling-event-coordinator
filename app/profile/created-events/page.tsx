@@ -1,4 +1,5 @@
 'use client';
+import LoadingEvents from '@/components/LoadingEvents';
 import { useQuery, gql } from '@apollo/client';
 import Link from 'next/link';
 
@@ -29,7 +30,8 @@ const CreatedEvents: React.FC<Props> = () => {
 
     const { loading, error, data } = useQuery(USER_QUERY);
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <LoadingEvents grey={true} />
+
 
     else if (data) {
         console.log(data.userById.createdEvents);
@@ -48,7 +50,7 @@ const CreatedEvents: React.FC<Props> = () => {
                                     </div>
                                 </div>
                                 {/* create a red button */}
-                                <Link href={`events/single-event/${event.createdEventId}`} className="flex justify-center mb-1">
+                                <Link href={`profile/edit-created-event/${event.createdEventId}`} className="flex justify-center mb-1">
                                     <button name={`EventButtonFor:${event.createdEventId}`} className="px-4 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 ">View Event</button>
                                 </Link>
                             </div>

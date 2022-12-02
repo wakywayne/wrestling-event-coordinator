@@ -144,7 +144,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
     if (eventsSortedByCoordinates && !finalEvents) {
         return (
             <>
-                <h1 className="my-6 text-4xl font-bold text-center">Events Closest to You With Weight Filter</h1>
+                <h2 className="my-6 text-3xl font-bold text-center">Events Closest to You With Weight Filter</h2>
                 <div className="flex justify-around">
                     {/* create a select input with two options */}
                     <select className="w-1/2 p-2 my-2 text-sm font-semibold text-black bg-gray-400 rounded-sm" onChange={(e) => setWeight(parseInt(e.target.value))}>
@@ -185,7 +185,7 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
     } else if (finalEvents) {
         return (
             <>
-                <h1 className="my-6 text-4xl font-bold text-center">Events Closest to You With Weight Filter</h1>
+                <h1 className="my-6 text-3xl font-bold text-center">Events Closest to You With Weight Filter</h1>
                 <div className="flex justify-around">
                     {/* create a select input with two options */}
                     <select className="w-1/2 p-2 my-2 text-sm font-semibold text-black bg-gray-400 rounded-sm" onChange={(e) => setWeight(parseInt(e.target.value))}>

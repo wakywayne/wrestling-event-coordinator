@@ -37,7 +37,7 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-debug-screens"), require('@shrutibalasa/tailwind-grid-auto-fit'), function ({ addComponents }) {
+  plugins: [require("tailwindcss-debug-screens"), require('@shrutibalasa/tailwind-grid-auto-fit'), function ({ addComponents, addVariant }) {
     addComponents({
       ".myContainer": {
         minHeight: "90vh",
@@ -52,5 +52,7 @@ module.exports = {
         },
       },
     });
+    // @todo add to blog
+    addVariant('myFocus', ['&:focus-visible', '&:focus-within', '&:focus']);
   }],
 }
