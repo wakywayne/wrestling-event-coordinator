@@ -7,7 +7,7 @@ interface Props {
 }
 
 const USER_QUERY = gql`
-query GetUserById {
+query UserByIdProfile {
       userById{
             name
             email

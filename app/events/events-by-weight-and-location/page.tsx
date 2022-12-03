@@ -12,7 +12,7 @@ interface Props {
 }
 
 const GET_EVENTS = gql`
-    query {
+    query EventsByWeightAndLocation {
     events {
     _id 
     createdBy

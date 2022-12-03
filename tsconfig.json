@@ -26,6 +26,9 @@
       "@/types/*": [
         "./types/*"
       ],
+      "@/src/*": [
+        "./src/*"
+      ]
     },
     "target": "es5",
     "lib": [

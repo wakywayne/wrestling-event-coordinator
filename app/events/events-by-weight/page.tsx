@@ -28,7 +28,7 @@ eventsByWeight(weight:$weight, plusOrMinus:$plusOrMinus){
 `;
 
 const GET_EVENTS = gql`
-    query {
+    query EventsByWeight{
     events {
     _id 
     createdBy

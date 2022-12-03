@@ -1,8 +1,11 @@
 'use client'
 
-import { Event as EventType } from '@/gql/index';
-import { useQuery, gql } from '@apollo/client';
+import { AiOutlineCheck } from 'react-icons/ai'
+import { FiX } from 'react-icons/fi'
+import { useQuery } from '@apollo/client';
+import { gql } from '@/src/__generated__/gql';
 import { BsPencilSquare } from 'react-icons/bs';
+import RadioButton from '@/components/RadioButton';
 
 interface Props {
     params: {
@@ -10,7 +13,7 @@ interface Props {
     };
 }
 
-const CREATED_EVENT_QUERY = gql`
+const CREATED_EVENT_QUERY = gql(`
     query EventById($id: mongoId!) {
         eventById(id: $id) {
             _id
@@ -35,7 +38,7 @@ const CREATED_EVENT_QUERY = gql`
         }
         }
     }
-            `;
+            `);
 
 const CreatedEventEdit: React.FC<Props> = ({ params }) => {
 
@@ -44,6 +47,8 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
             id: params.id
         }
     });
+
+
 
     if (loading) return (
         <div className='relative myContainer '>
@@ -60,6 +65,8 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
     )
     if (error) return <p>Error :(</p>;
 
+    let applicantsExist = data.eventById.eventApplicants.length > 0;
+
     return (
         <div className='relative '>
             <h1 className='text-4xl font-bold text-center mt-7'>{data.eventById.name} Event</h1>
@@ -68,15 +75,28 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
 
                     {/*display the weights for the event */}
                     <div className='flex flex-col items-center justify-center '>
-                        <p className='my-1 text-xl '>{data.eventById.description}</p>
                         <p className='my-1 text-xl '>{data.eventById.date}</p>
-                        <p className='my-1 text-xl '>{data.eventById.link}</p>
-                        <p className='my-1 text-xl '>{data.eventById.location.coordinates}</p>
-                        <p className='my-1 text-xl '>{data.eventById.eventApplicants.name}</p>
-                        <div>
-                            data.event
+                        <a href={data.eventById.link} target="_blank" className='my-1 text-xl underline text-myLightBlue' rel="noreferrer">Event Link</a>
+                        <div className="flex items-center">
+                            <p className='my-1 mr-1 text-xl'>Has Applicants: </p>
+                            {applicantsExist ? <AiOutlineCheck /> : <FiX />}
+                        </div>
+                        <div className="flex flex-col items-center w-full ">
+                            <h6 className='mx-auto text-xl '>Weight Spots</h6>
+                            {data.eventById.weights.map((weight: any, index: number) => {
+                                return (
+                                    <div key={`dataEventsByIdWeights ${index}`} className='flex flex-wrap items-center justify-start w-full px-2 my-2 bg-white border-2 border-black border-solid rounded-full'>
+                                        <p className='my-1 mr-1 text-xl'>{weight.weight}<sub>lbs</sub>:</p>
+                                        {weight.spotsAvailable.map((spot: any, index: number) => {
+                                            // return spot.userId !== "empty" ? <input type='radio' className='my-1 mr-1 text-xl' checked /> : <input type='radio' className='my-1 mr-1 text-xl' />
+                                            return spot.userId !== "empty" ? <RadioButton checked={true} /> : <RadioButton checked={false} />
+                                        })}
+                                    </div>
+                                )
+                            })}
                         </div>
                         <p className='my-1 text-xl '>{data.eventById.weights.weight}</p>
+                        <p className='my-1 text-xl '>{data.eventById.description}</p>
                         {/* <p>{data.eventById.weights.spotsAvailable.name}</p> */}
                         {/* <p>{data.eventById.weights.spotsAvailable.userId}</p> */}
                     </div>

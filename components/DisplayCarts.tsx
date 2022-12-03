@@ -18,7 +18,7 @@ export default function DisplayCarts() {
 
 
     const GET_CARTS = gql`
-query {
+query  CartsQueryBull{
 carts{
 id
 items{

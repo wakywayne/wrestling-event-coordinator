@@ -5,7 +5,7 @@ import { useQuery, gql } from '@apollo/client';
 import Link from 'next/link';
 
 const USER_QUERY = gql`
-query GetUserById {
+query UserByIdAppliedEvents {
       userById{
             signedUpEvents {
                 accepted

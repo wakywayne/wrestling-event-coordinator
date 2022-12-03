@@ -32,6 +32,9 @@ module.exports = {
         "myRed": "#FF0000",
         "myDarkRed": "#B10000",
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
       fontFamily: {
         poppins: ["var(--font-poppins)", ...fontFamily.sans],
       },

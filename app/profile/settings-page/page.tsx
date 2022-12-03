@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const USER_QUERY = gql`
-query GetUserById {
+query UserByIdSettings {
       userById{
             name
             email
