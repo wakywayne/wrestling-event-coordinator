@@ -1,6 +1,7 @@
 'use client'
 
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
+import { gql } from '@/src/__generated__';
 import { useState, useEffect } from 'react';
 import { Event as EventType, weightsForEvent } from '@/gql/index';
 import { useSession } from 'next-auth/react';
@@ -11,7 +12,7 @@ interface Props {
     }
 }
 
-const GET_EVENT_BY_ID = gql`
+const GET_EVENT_BY_ID = gql(`
 query GetEventById($id: mongoId!){
   eventById(id:$id){
     _id
@@ -28,13 +29,13 @@ query GetEventById($id: mongoId!){
     }
   }
 }
-`;
+`);
 
-const APPLY_FOR_WEIGHT = gql`
+const APPLY_FOR_WEIGHT = gql(`
 mutation ApplyToEvents($input: MutationApplyToEventInput!){
   applyToEvent(input:$input)
 }
-`;
+`);
 
 const SingleEventPage: React.FC<Props> = ({ params }) => {
 
@@ -59,33 +60,40 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
 
     function applyForWeightClick(weight: number) {
 
+        if (data?.eventById) {
 
-        let input = {
-            eventDate: data.eventById.date,
-            eventId: params.id,
-            eventName: data.eventById.name,
-            name: session?.user.name ? session?.user.name : false,
-            weight: weight
-        }
+            let input = {
+                eventDate: data.eventById.date,
+                eventId: params.id,
+                eventName: data.eventById.name,
+                name: session?.user.name ? session?.user.name : false,
+                weight: weight
+            }
 
-        if (!weight) {
-            return;
-        }
-        else if (!session?.user.name) {
-            alert("You have not set up a name for your profile. Please do so in your profile settings.")
-            setApplyForWeight("default")
-            return;
-        }
-        else if (confirm(`Are you sure you want to apply for the ${weight} weight?`)) {
-            setApplyForWeight(weight)
-            applyToEvent({ variables: { input } })
+            if (!weight) {
+                return;
+            }
+            else if (!session?.user.name) {
+                alert("You have not set up a name for your profile. Please do so in your profile settings.")
+                setApplyForWeight("default")
+                return;
+            }
+            else if (confirm(`Are you sure you want to apply for the ${weight} weight?`)) {
+                setApplyForWeight(weight)
+                applyToEvent({ variables: { input } })
+            } else {
+                setApplyForWeight("default")
+            }
         } else {
-            setApplyForWeight("default")
+            alert("Event did not have id")
+            // @todo in the future you should have an error collection in the database
+            // This will allow you to better handle errors in production
         }
     }
 
     if (data?.eventById) {
-        const event: EventType = data.eventById;
+        // @ts-ignore unfortunately I started getting the graphql types into the frontend a little too late
+        const event: Omit<EventType, "location" | "createdBy"> = data.eventById;
 
         return (
             // <div className='relative w-screen myContainer bg-gradient-to-b from-transparent to-green-300'>

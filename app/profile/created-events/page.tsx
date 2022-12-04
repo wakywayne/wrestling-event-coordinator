@@ -1,9 +1,10 @@
 'use client';
 import LoadingEvents from '@/components/LoadingEvents';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
+import { gql } from '@/src/__generated__';
 import Link from 'next/link';
 
-const USER_QUERY = gql`
+const USER_QUERY = gql(`
 query UserByIdCreatedEvents {
       userById{
             createdEvents {
@@ -19,7 +20,7 @@ query UserByIdCreatedEvents {
         }
     }
     
-`;
+`);
 
 interface Props {
 
@@ -33,8 +34,7 @@ const CreatedEvents: React.FC<Props> = () => {
     if (loading) return <LoadingEvents grey={true} />
 
 
-    else if (data) {
-        console.log(data.userById.createdEvents);
+    if (data?.userById?.createdEvents) {
         return (
             <>
                 <h1 className="text-3xl font-bold text-center">Created Events</h1>

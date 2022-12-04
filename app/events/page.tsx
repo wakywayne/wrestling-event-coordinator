@@ -1,14 +1,13 @@
 import { Event as EventType } from '@/gql/index';
-import LoadingEvents from '@/components/LoadingEvents';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import WriteEventsCache from '@/gql/WriteEventsCache';
-// import dynamic from 'next/dynamic';
 
 interface Props {
 
 }
 
-// const DynamicWriteEventsCache = dynamic(() => import('@/gql/WriteEventsCache'), {
+// const DynamicWriteEventsCache = dynamic(() => import("../../gql/WriteEventsCache"), {
 //     ssr: false
 // })
 

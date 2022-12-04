@@ -65,48 +65,55 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
     )
     if (error) return <p>Error :(</p>;
 
-    let applicantsExist = data.eventById.eventApplicants.length > 0;
+    if (data?.eventById) {
+        let applicantsExist = data.eventById.eventApplicants?.length;
+        let weightsExist = data.eventById.weights?.length;
 
-    return (
-        <div className='relative '>
-            <h1 className='text-4xl font-bold text-center mt-7'>{data.eventById.name} Event</h1>
-            <div className='p-2 rounded pattern'>
-                <div className='flex flex-col items-center justify-center mt-6'>
+        return (
+            <div className='relative '>
+                <h1 className='text-4xl font-bold text-center mt-7'>{data.eventById.name} Event</h1>
+                <div className='p-2 rounded pattern'>
+                    <div className='flex flex-col items-center justify-center mt-6'>
 
-                    {/*display the weights for the event */}
-                    <div className='flex flex-col items-center justify-center '>
-                        <p className='my-1 text-xl '>{data.eventById.date}</p>
-                        <a href={data.eventById.link} target="_blank" className='my-1 text-xl underline text-myLightBlue' rel="noreferrer">Event Link</a>
-                        <div className="flex items-center">
-                            <p className='my-1 mr-1 text-xl'>Has Applicants: </p>
-                            {applicantsExist ? <AiOutlineCheck /> : <FiX />}
+                        {/*display the weights for the event */}
+                        <div className='flex flex-col items-center justify-center '>
+                            <p className='my-1 text-xl '>{data.eventById.date}</p>
+                            <a href={`${data.eventById.link}`} target="_blank" className='my-1 text-xl underline text-myLightBlue' rel="noreferrer">Event Link</a>
+                            <div className="flex items-center">
+                                <p className='my-1 mr-1 text-xl'>Has Applicants: </p>
+                                {applicantsExist ? <AiOutlineCheck /> : <FiX />}
+                            </div>
+                            <div className="flex flex-col items-center w-full ">
+                                <h6 className='mx-auto text-xl '>Weight Spots</h6>
+                                {/* @ts-ignore we are good here*/}
+                                {data?.eventById?.weights ? data.eventById.weights.map((weight: any, index: number) => {
+                                    return (
+                                        <div key={`dataEventsByIdWeights ${index}`} className='flex flex-wrap items-center justify-start w-full px-2 my-2 bg-white border-2 border-black border-solid rounded-full'>
+                                            <p className='my-1 mr-1 text-xl'>{weight.weight}<sub>lbs</sub>:</p>
+                                            {weight.spotsAvailable.map((spot: any, index: number) => {
+                                                // return spot.userId !== "empty" ? <input type='radio' className='my-1 mr-1 text-xl' checked /> : <input type='radio' className='my-1 mr-1 text-xl' />
+                                                return spot.userId !== "empty" ? <RadioButton checked={true} /> : <RadioButton checked={false} />
+                                            })}
+                                        </div>
+                                    )
+                                }) : <p className='my-1 text-xl'>No weights added</p>}
+                            </div>
+                            {/* @ts-ignore not sure about this one... */}
+                            {data?.eventById?.weights ? <p className='my-1 text-xl '>{data.eventById.weights.weight}</p> : <p className='my-1 text-xl'>No weights added</p>}
+                            <p className='my-1 text-xl '>{data.eventById.description}</p>
+                            {/* <p>{data.eventById.weights.spotsAvailable.name}</p> */}
+                            {/* <p>{data.eventById.weights.spotsAvailable.userId}</p> */}
                         </div>
-                        <div className="flex flex-col items-center w-full ">
-                            <h6 className='mx-auto text-xl '>Weight Spots</h6>
-                            {data.eventById.weights.map((weight: any, index: number) => {
-                                return (
-                                    <div key={`dataEventsByIdWeights ${index}`} className='flex flex-wrap items-center justify-start w-full px-2 my-2 bg-white border-2 border-black border-solid rounded-full'>
-                                        <p className='my-1 mr-1 text-xl'>{weight.weight}<sub>lbs</sub>:</p>
-                                        {weight.spotsAvailable.map((spot: any, index: number) => {
-                                            // return spot.userId !== "empty" ? <input type='radio' className='my-1 mr-1 text-xl' checked /> : <input type='radio' className='my-1 mr-1 text-xl' />
-                                            return spot.userId !== "empty" ? <RadioButton checked={true} /> : <RadioButton checked={false} />
-                                        })}
-                                    </div>
-                                )
-                            })}
-                        </div>
-                        <p className='my-1 text-xl '>{data.eventById.weights.weight}</p>
-                        <p className='my-1 text-xl '>{data.eventById.description}</p>
-                        {/* <p>{data.eventById.weights.spotsAvailable.name}</p> */}
-                        {/* <p>{data.eventById.weights.spotsAvailable.userId}</p> */}
+
+                        {/* make a small button */}
                     </div>
-
-                    {/* make a small button */}
                 </div>
+                <button className='absolute top-0 flex p-2 text-xs text-white rounded-lg bg-myRed hover:bg-red-700 right-3 hover:cursor-pointer myFocus:ring-4 ring-red-300'><span className='mr-1 '>Edit</span> <BsPencilSquare /></button>
             </div>
-            <button className='absolute top-0 flex p-2 text-xs text-white rounded-lg bg-myRed hover:bg-red-700 right-3 hover:cursor-pointer myFocus:ring-4 ring-red-300'><span className='mr-1 '>Edit</span> <BsPencilSquare /></button>
-        </div>
-    );
+        )
+    } else {
+        return <p>Event not found</p>
+    }
 }
 
 export default CreatedEventEdit;

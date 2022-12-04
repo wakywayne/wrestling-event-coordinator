@@ -1,12 +1,13 @@
 'use client';
 
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
+import { gql } from '@/src/__generated__';
 
 interface Props {
 
 }
 
-const USER_QUERY = gql`
+const USER_QUERY = gql(`
 query UserByIdProfile {
       userById{
             name
@@ -30,7 +31,7 @@ query UserByIdProfile {
         }
         }
     }
-`;
+`);
 
 const Updates: React.FC<Props> = () => {
 

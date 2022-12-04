@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useQuery, useLazyQuery, gql } from '@apollo/client';
+import { useQuery, useLazyQuery } from '@apollo/client';
+import { gql } from '@/src/__generated__';
 import { Event as EventType } from '@/gql/index';
 import { useSession } from 'next-auth/react';
 import LoadingEvents from '@/components/LoadingEvents';
@@ -12,7 +13,7 @@ interface Props {
 }
 
 
-const GET_EVENTS_BY_WEIGHT = gql`
+const GET_EVENTS_BY_WEIGHT = gql(`
 query GetEventsByWeight($weight: Int!, $plusOrMinus:Int){
 eventsByWeight(weight:$weight, plusOrMinus:$plusOrMinus){
     _id 
@@ -25,9 +26,9 @@ eventsByWeight(weight:$weight, plusOrMinus:$plusOrMinus){
   }
 }
 }
-`;
+`);
 
-const GET_EVENTS = gql`
+const GET_EVENTS = gql(`
     query EventsByWeight{
     events {
     _id 
@@ -37,7 +38,7 @@ const GET_EVENTS = gql`
     description
         }
     }
-`;
+`);
 
 
 
@@ -55,7 +56,7 @@ const EventsByWeights: React.FC<Props> = () => {
     // we use lazy query so we can call this in the function
     const [getEventsByWeight,] = useLazyQuery(GET_EVENTS_BY_WEIGHT, {
         onCompleted: (data) => {
-            setEvents(data.eventsByWeight)
+            setEvents(data.eventsByWeight as EventType[]);
         }
     });
 

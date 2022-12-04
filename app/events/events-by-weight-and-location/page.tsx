@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useQuery, useLazyQuery, gql } from '@apollo/client';
+import { useQuery, useLazyQuery } from '@apollo/client';
+import { gql } from '@/src/__generated__';
 import { Event as EventType } from '@/gql/index';
 import LoadingEvents from '@/components/LoadingEvents';
 import { useSession } from 'next-auth/react';
@@ -11,7 +12,7 @@ interface Props {
 
 }
 
-const GET_EVENTS = gql`
+const GET_EVENTS = gql(`
     query EventsByWeightAndLocation {
     events {
     _id 
@@ -21,9 +22,9 @@ const GET_EVENTS = gql`
     description
         }
     }
-`;
+`);
 
-const GET_EVENTS_BY_WEIGHT = gql`
+const GET_EVENTS_BY_WEIGHT = gql(`
 query GetEventsByWeight($weight: Int!, $plusOrMinus:Int){
 eventsByWeight(weight:$weight, plusOrMinus:$plusOrMinus){
     _id 
@@ -36,9 +37,9 @@ eventsByWeight(weight:$weight, plusOrMinus:$plusOrMinus){
   }
 }
 }
-`;
+`);
 
-const GET_EVENTS_BY_DISTANCE = gql`
+const GET_EVENTS_BY_DISTANCE = gql(`
 query GetEventsByDistance($coordinates: [Float!]!){
 eventsByDistance(coordinates:$coordinates){
     _id
@@ -51,7 +52,7 @@ eventsByDistance(coordinates:$coordinates){
     }
 }
 }
-`;
+`);
 
 
 
@@ -70,13 +71,13 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
 
     const [getEventsByWeight,] = useLazyQuery(GET_EVENTS_BY_WEIGHT, {
         onCompleted: (data) => {
-            filterByWeightsFunction(data.eventsByWeight)
+            filterByWeightsFunction(data.eventsByWeight as EventType[]);
         }
     });
 
     const [getEventsByLocation, { loading: lazyLoading }] = useLazyQuery(GET_EVENTS_BY_DISTANCE, {
         onCompleted: (data) => {
-            setEventsSortedByCoordinates(data.eventsByDistance)
+            setEventsSortedByCoordinates(data.eventsByDistance as EventType[]);
         }
     });
 
@@ -92,8 +93,10 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
         if (eventsSortedByCoordinates) {
             const finalEvents = eventsSortedByCoordinates.filter((event: EventType) => events.find(e => e._id === event._id))
             setFinalEvents(finalEvents)
-        } else if (!eventsSortedByCoordinates && data.events) {
-            const finalEvents = data.events.filter((event: EventType) => events.find(e => e._id === event._id))
+        } else if (!eventsSortedByCoordinates && data?.events) {
+            const finalEvents: Array<Partial<EventType>> = data.events.filter((event: Partial<EventType>) => events.find(e => e._id === event._id))
+            // Same problem as other file where we were getting a location error and had to use partial
+            // @ts-ignore
             setFinalEvents(finalEvents)
         }
 

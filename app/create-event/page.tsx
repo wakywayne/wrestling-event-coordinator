@@ -1,6 +1,7 @@
 'use client'
 
-import { useMutation, gql } from "@apollo/client";
+import { useMutation } from "@apollo/client";
+import { gql } from "@/src/__generated__";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +25,7 @@ interface EventType {
     name: string;
 }
 
-const CREATE_EVENT = gql`
+const CREATE_EVENT = gql(`
 mutation CreateEvent($input: MutationCreateEventInput!){
   createEvent(input:$input){
         _id
@@ -35,7 +36,7 @@ mutation CreateEvent($input: MutationCreateEventInput!){
         link
     }
 }
-`;
+`);
 
 
 const CreateEvent: React.FC<Props> = () => {
@@ -73,7 +74,11 @@ const CreateEvent: React.FC<Props> = () => {
 
     const [createEvent, { loading, error }] = useMutation(CREATE_EVENT, {
         onCompleted: (data) => {
-            setSuccess(`${data.createEvent._id}`);
+            if (data?.createEvent?._id) {
+                setSuccess(`${data.createEvent._id}`);
+            } else {
+                alert("Error creating event");
+            }
         }
     });
 
@@ -136,9 +141,16 @@ const CreateEvent: React.FC<Props> = () => {
         //     }
         // ]
 
+        interface userIdEmpty {
+            userId: string;
+            name: string;
+        }
 
         let representative: number[] = [];
-        let holder = {};
+
+        type emptyObject = {};
+
+        let holder: userIdEmpty | emptyObject = {};
 
         if (cleanedFormValues.weights) {
 
@@ -172,16 +184,35 @@ const CreateEvent: React.FC<Props> = () => {
             )
         }
 
+
+
+        interface arrayFiedInterface {
+            weight: number;
+            spotsAvailable: userIdEmpty[];
+        }[]
+
+
+
+
         const arrayFideObject = Object.entries(holder).map(([key, value]) => ({ weight: Number(key), spotsAvailable: value }))
 
 
+        // test to see if all objects in arrayFideObject have spotsAvailable 
 
-        createEvent({
-            variables: {
-                input: { ...cleanedFormValues, weights: arrayFideObject }
+        const spotsAvailableExists = arrayFideObject.every((obj) => typeof obj.spotsAvailable == typeof "string");
 
-            }
-        })
+
+        if (spotsAvailableExists) {
+            createEvent({
+                variables: {
+                    // @ts-ignore we are good here
+                    input: { ...cleanedFormValues, weights: arrayFideObject }
+
+                }
+            })
+        } else {
+            alert("Error creating event no spots available property exists")
+        }
     }
 
 

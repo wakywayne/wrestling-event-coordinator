@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useQuery, useLazyQuery, gql } from '@apollo/client';
+import { useQuery, useLazyQuery } from '@apollo/client';
+import { gql } from '@/src/__generated__';
 import { Event as EventType } from '@/gql/index';
 import LoadingEvents from '@/components/LoadingEvents';
 import Link from 'next/link';
@@ -10,7 +11,7 @@ interface Props {
 
 }
 
-const GET_EVENTS = gql`
+const GET_EVENTS = gql(`
     query EventsByLocation {
     events {
     _id 
@@ -20,9 +21,9 @@ const GET_EVENTS = gql`
     description
         }
     }
-`;
+`);
 
-const GET_EVENTS_BY_DISTANCE = gql`
+const GET_EVENTS_BY_DISTANCE = gql(`
 query GetEventsByDistance($coordinates: [Float!]!){
 eventsByDistance(coordinates:$coordinates){
     _id
@@ -35,7 +36,7 @@ eventsByDistance(coordinates:$coordinates){
     }
 }
 }
-`;
+`);
 
 
 
@@ -48,7 +49,11 @@ const EventsByLocation: React.FC<Props> = () => {
     const { loading, error, data } = useQuery(GET_EVENTS);
     const [getEventsByLocation, { loading: lazyLoading }] = useLazyQuery(GET_EVENTS_BY_DISTANCE, {
         onCompleted: (data) => {
-            setEventsSortedByCoordinates(data.eventsByDistance)
+            if (data.eventsByDistance) {
+                setEventsSortedByCoordinates(data.eventsByDistance as EventType[]);
+            } else {
+                alert('No events found in your area')
+            }
         }
     });
     // get the user's coordinates
@@ -131,13 +136,15 @@ const EventsByLocation: React.FC<Props> = () => {
 
             </>
         )
-    } else if (!coordinates) {
+    } else if (!coordinates && data?.events) {
         return (
             <>
                 <p>You did not give us location permissions you won&apos;t be able to use this feature. <strong>We are currently displaying all events</strong></p>
                 <h1 className="mt-2 text-4xl font-bold text-center">All Events</h1>
                 <div className="grid grid-auto-fit">
-                    {data.events.map((event: EventType) => (
+                    {data.events.map((event: Partial<EventType>) => (
+
+                        // Was struggling to get the types to work here, I messed up by making id optional in the type maybe?
 
                         <div key={`mainEventWhenNoLocationGiven${event._id}`} id={`${event._id}`} className="relative m-4 border-2 rounded-lg shadow-lg bg-gradient-to-br from-myGreen to-green-500 ">
                             <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>

@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
+import { gql } from '@/src/__generated__';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-const USER_QUERY = gql`
+const USER_QUERY = gql(`
 query UserByIdSettings {
       userById{
             name
@@ -13,9 +14,9 @@ query UserByIdSettings {
             availableWeights
         }
     }    
-`;
+`);
 
-const UPDATE = gql`
+const UPDATE = gql(`
 mutation UpdateUserSettings($input: MutationUpdateUserSettingsInput!){
   updateUserSettings(input:$input){
     name
@@ -23,7 +24,7 @@ mutation UpdateUserSettings($input: MutationUpdateUserSettingsInput!){
     availableWeights
   }
 }
-`;
+`);
 
 interface Props {
 
@@ -64,16 +65,20 @@ const SettingPage: React.FC<Props> = () => {
 
     async function formFunction(formValues: formType) {
         let { name, availableWeights } = formValues;
-        await updateMutation({ variables: { input: { name, availableWeights } } });
+        if (name) {
+            await updateMutation({ variables: { input: { name, availableWeights } } });
+        } else {
+            alert("You must enter a name")
+        }
 
     }
 
     useEffect(() => {
-        if (data) {
+        if (data?.userById?.name && data?.userById?.email && data?.userById?.availableWeights) {
             reset({
-                name: data?.userById.name,
-                email: data?.userById.email,
-                availableWeights: data?.userById.availableWeights
+                name: data.userById.name,
+                email: data.userById.email,
+                availableWeights: data.userById.availableWeights
             });
         }
         if (dataUpdate) {

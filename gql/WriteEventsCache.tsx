@@ -1,6 +1,7 @@
 'use client'
 
 import { useApolloClient, gql, } from "@apollo/client";
+// I am not using the type gql version here because I am using the client directly
 import { Event as EventType } from '@/gql/index';
 
 interface Props {
