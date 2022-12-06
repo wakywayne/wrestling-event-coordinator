@@ -5,13 +5,11 @@ import { IoIosCreate } from 'react-icons/io';
 import { ReactElement } from 'react';
 
 
-interface Props {
-    children: React.ReactNode;
-}
 
 
 
-const EventsLayout = async ({ children }: { children: ReactElement }) => {
+
+const EventsLayout = async ({ children }: any) => {
 
 
     return (

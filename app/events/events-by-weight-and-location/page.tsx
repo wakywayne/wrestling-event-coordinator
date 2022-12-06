@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { gql } from '@/src/__generated__';
 import { Event as EventType } from '@/gql/index';
-import LoadingEvents from '@/components/LoadingEvents';
+// import LoadingEvents from '@/components/LoadingEvents';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -225,16 +225,18 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
                 </div>
                 {/* <button onClick={() => revokePermission()} className="absolute bottom-0 left-0 p-2 m-4 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">Allow Location</button> */}
             </>)
-    } else if (loading || lazyLoading) {
-        return (
-            <>
-                <h1 className="mt-6 text-4xl font-bold text-center">Events Closest to You</h1>
-                <LoadingEvents />
-                {/* make a button that is absolutely positioned in the bottom right */}
+    }
+    // else if (loading || lazyLoading) {
+    //     return (
+    //         <>
+    //             <h1 className="mt-6 text-4xl font-bold text-center">Events Closest to You</h1>
+    //             <LoadingEvents />
+    //             {/* make a button that is absolutely positioned in the bottom right */}
 
-            </>
-        )
-    } else if (!coordinates) {
+    //         </>
+    //     )
+    // }
+    else if (!coordinates) {
         return (
             <>
                 <p>You did not give us location permissions you won&apos;t be able to use this feature. <strong>Go to the View Events With Your Weight Available Option</strong></p>

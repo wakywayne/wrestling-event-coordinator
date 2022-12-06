@@ -46,8 +46,8 @@ const EventsByLocation: React.FC<Props> = () => {
     const [coordinates, setCoordinates] = useState<number[] | undefined>(undefined);
     const [eventsSortedByCoordinates, setEventsSortedByCoordinates] = useState<EventType[] | undefined>(undefined);
 
-    const { loading, error, data } = useQuery(GET_EVENTS);
-    const [getEventsByLocation, { loading: lazyLoading }] = useLazyQuery(GET_EVENTS_BY_DISTANCE, {
+    const { error, data } = useQuery(GET_EVENTS);
+    const [getEventsByLocation,] = useLazyQuery(GET_EVENTS_BY_DISTANCE, {
         onCompleted: (data) => {
             if (data.eventsByDistance) {
                 setEventsSortedByCoordinates(data.eventsByDistance as EventType[]);
@@ -127,16 +127,17 @@ const EventsByLocation: React.FC<Props> = () => {
                 {/* <button onClick={() => revokePermission()} className="absolute bottom-0 left-0 p-2 m-4 text-sm font-semibold text-white rounded-full bg-gradient-to-br from-myRed to-red-400 hover:bg-red-800">Allow Location</button> */}
             </>
         )
-    } else if (loading || lazyLoading) {
-        return (
-            <>
-                <h1 className="mt-2 text-4xl font-bold text-center">Events Closest to You</h1>
-                <LoadingEvents />
-                {/* make a button that is absolutely positioned in the bottom right */}
+    }
+    // else if (loading || lazyLoading) {
+    //     return (
+    //         <>
+    //             <h1 className="mt-2 text-4xl font-bold text-center">Events Closest to You</h1>
+    //             <LoadingEvents />
+    //             {/* make a button that is absolutely positioned in the bottom right */}
 
-            </>
-        )
-    } else if (!coordinates && data?.events) {
+    //         </>
+    //     )}
+    else if (!coordinates && data?.events) {
         return (
             <>
                 <p>You did not give us location permissions you won&apos;t be able to use this feature. <strong>We are currently displaying all events</strong></p>

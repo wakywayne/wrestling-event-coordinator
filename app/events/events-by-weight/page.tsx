@@ -5,7 +5,7 @@ import { useQuery, useLazyQuery } from '@apollo/client';
 import { gql } from '@/src/__generated__';
 import { Event as EventType } from '@/gql/index';
 import { useSession } from 'next-auth/react';
-import LoadingEvents from '@/components/LoadingEvents';
+// import LoadingEvents from '@/components/LoadingEvents';
 import Link from 'next/link';
 
 interface Props {
@@ -51,7 +51,7 @@ const EventsByWeights: React.FC<Props> = () => {
     const { data: session } = useSession();
 
     // Get all events from cache
-    const { loading, error, data } = useQuery(GET_EVENTS);
+    const { error, data } = useQuery(GET_EVENTS);
 
     // we use lazy query so we can call this in the function
     const [getEventsByWeight,] = useLazyQuery(GET_EVENTS_BY_WEIGHT, {
@@ -72,14 +72,15 @@ const EventsByWeights: React.FC<Props> = () => {
     }
 
 
-    if (!events && loading) {
-        return (
-            <>
-                <h1 className="mt-2 text-4xl font-bold text-center">Events By Weight</h1>
-                <LoadingEvents />
-            </>
-        )
-    } else if (error) {
+    // if (!events && loading) {
+    //     return (
+    //         <>
+    //             <h1 className="mt-2 text-4xl font-bold text-center">Events By Weight</h1>
+    //             <LoadingEvents />
+    //         </>
+    //     )
+    // } 
+    if (error) {
         return (
             <>
                 <h1 className="mt-2 text-4xl font-bold text-center">Sorry there was an error loading events please click on events in the navigation menu</h1>
