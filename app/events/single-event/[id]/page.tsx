@@ -66,7 +66,7 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
                 eventDate: data.eventById.date,
                 eventId: params.id,
                 eventName: data.eventById.name,
-                name: session?.user.name ? session?.user.name : false,
+                name: session?.user.name ? session?.user.name : "you need to log in",
                 weight: weight
             }
 

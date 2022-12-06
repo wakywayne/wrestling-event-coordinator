@@ -1,19 +1,19 @@
 import { Event as EventType } from '@/gql/index';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import 'server-only';
 import WriteEventsCache from '@/gql/WriteEventsCache';
 
 interface Props {
 
 }
 
-// const DynamicWriteEventsCache = dynamic(() => import("../../gql/WriteEventsCache"), {
-//     ssr: false
-// })
 
 
 async function getEvents() {
     const res = await fetch('http://localhost:3000/api', {
+        cache: 'no-store',
+        // By setting cache to no-store, we ensure that the browser will always dynamically render this data it will not update the cache
+        // And therefore is rendered entirely before the page is rendered
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -61,10 +61,10 @@ export default async function EventPage() {
                             <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
                             <div className="flex justify-center rounded-t-lg ">
                                 <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
-                                    <p className="my-1 text-sm">Location: </p>
+                                    <p className="my-1 text-2xl lg:text-sm">Location: </p>
                                     {/* @ts-ignore */}
-                                    <p className="my-1 text-sm">Date: {event.date}</p>
-                                    <p className="my-1 text-sm">Description: {event.description}</p>
+                                    <p className="my-1 text-2xl lg:text-sm">Date: {event.date}</p>
+                                    <p className="my-1 text-2xl lg:text-sm">Description: {event.description}</p>
                                 </div>
                             </div>
                             {/* create a red button */}

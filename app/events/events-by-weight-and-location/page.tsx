@@ -168,10 +168,10 @@ const EventsByLocationAndWeight: React.FC<Props> = () => {
                             <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.name}</p>
                             <div className="flex justify-center rounded-t-lg ">
                                 <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
-                                    <p className="my-1 text-sm">Location: </p>
+                                    <p className="my-1 text-2xl lg:text-sm">Location: </p>
                                     {/* @ts-ignore */}
-                                    <p className="my-1 text-sm">Date: {event.date}</p>
-                                    <p className="my-1 text-sm">Description: {event.description}</p>
+                                    <p className="my-1 text-2xl lg:text-sm">Date: {event.date}</p>
+                                    <p className="my-1 text-2xl lg:text-sm">Description: {event.description}</p>
                                 </div>
                             </div>
                             {/* create a red button */}

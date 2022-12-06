@@ -40,3 +40,12 @@ body {
 /* * {
   border: #000000 1px solid;
 } */
+
+.create-event-grid {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(7, 5vh minmax(2px, 1fr));
+}

@@ -43,8 +43,8 @@ const AppliedEventsComponentPainInMy: React.FC<Props> = () => {
                                 <p className="m-2 text-lg font-semibold tracking-wider text-center text-white rounded-full font-poppins ">{event.eventName}</p>
                                 <div className="flex justify-center rounded-t-lg ">
                                     <div className="w-11/12 p-2 mb-2 bg-white border-2 rounded-sm decoration-from-font ">
-                                        <p className="my-1 text-sm">Description: {event.eventName}</p>
-                                        <p className="my-1 text-sm">Date: {event.signedUpEventDate}</p>
+                                        <p className="my-1 text-2xl lg:text-sm">Description: {event.eventName}</p>
+                                        <p className="my-1 text-2xl lg:text-sm">Date: {event.signedUpEventDate}</p>
                                     </div>
                                 </div>
                                 {/* create a red button */}
