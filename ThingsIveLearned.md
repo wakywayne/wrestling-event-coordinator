@@ -10,7 +10,7 @@
 
 ### Amazing form for create Event *both styles and functional error handling
 - we use zod and react hook form
-- build a grid with the exact cols and forms we need in our css file
+- build a grid with the exact cols and rows we need in our css file
 - and make flex box form groups
 
 ### How to handle focus 

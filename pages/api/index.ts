@@ -237,7 +237,7 @@ builder.objectType(createdEvents, {
 builder.objectType(weightsForUserCreatedEvents, {
     name: 'weightsForUserCreatedEvents',
     fields: (t) => ({
-        weight: t.exposeString('weight'),
+        weight: t.exposeFloat('weight'),
         // I might t want to make this a field type  and return an empty object if filled is an empty array
         filled: t.exposeBooleanList('filled'),
     })
@@ -627,13 +627,14 @@ builder.queryType({
                     createdBy: t.input.field({ type: 'mongoId', required: true }),
                     applicantId: t.input.field({ type: 'mongoId', required: true }),
                     applicantName: t.input.string({ required: true }),
-                    boolean: t.input.boolean({ required: true })
+                    boolean: t.input.boolean({ required: true }),
+                    weight: t.input.float({ required: true }),
                 },
                 type: 'Boolean',
-                resolve: async (parent, { input: { eventId, createdBy, applicantId, applicantName, boolean } }, context) => {
+                resolve: async (parent, { input: { eventId, createdBy, applicantId, applicantName, boolean, weight } }, context) => {
                     try {
                         if (context.currentUser._id == createdBy) {
-                            return await errorIfPromiseFalse(dbMutations.acceptOrRemoveApplicant(eventId, createdBy, applicantId, applicantName, boolean), 'Error accepting applicant')
+                            return await errorIfPromiseFalse(dbMutations.acceptOrRemoveApplicant(eventId, createdBy, applicantId, applicantName, boolean, weight), 'Error accepting applicant')
                         } else {
                             return new Error('You are not the creator of this event')
                         }

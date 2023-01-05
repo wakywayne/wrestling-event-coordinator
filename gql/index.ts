@@ -2,11 +2,11 @@ import { ObjectId } from 'bson';
 
 
 export class weightsForUserCreatedEvents {
-    weight?: string;
+    weight?: number;
     filled?: boolean[];
 
 
-    constructor(weight?: string, filled?: boolean[]) {
+    constructor(weight?: number, filled?: boolean[]) {
         this.weight = weight;
         this.filled = filled;
     }

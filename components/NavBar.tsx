@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Props {
 
@@ -9,7 +10,7 @@ const NavBar: React.FC<Props> = () => {
         <>
             <nav className="relative z-10 flex items-center w-screen p-6 bg-black h-mobileNav lg:h-nav md:justify-between">
                 <div className="flex items-center flex-shrink-0 mr-6 text-white">
-                    <span className="text-xl font-semibold tracking-tight">Logo</span>
+                    <Image src="/logoWithoutWords.png" alt="logo" width={100} height={100} />
                 </div>
                 <div className="flex items-center w-full ">
                     <div className="flex flex-grow text-base lg:text-base 2xl:justify-evenly 2xl: justify-evenly lg:justify-start">
