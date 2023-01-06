@@ -25,6 +25,7 @@ const documents = {
     "\nquery UserByIdCreatedEvents {\n      userById{\n            createdEvents {\n                createdEventId\n                eventName\n                createdEventDescription\n                createdEventDate\n                createdEventWeights{\n                    weight\n                    filled\n                }\n            }\n        }\n    }\n    \n": types.UserByIdCreatedEventsDocument,
     "\n    query EventById($id: mongoId!) {\n        eventById(id: $id) {\n            _id\n            name\n            description\n            location{\n              coordinates\n            }\n            date\n            cost\n            createdBy\n        \teventApplicants{\n            name\n            userId\n            weight\n          }\n        link\n        weights{\n          weight\n          spotsAvailable{\n            name\n            userId\n          }\n        }\n        }\n    }\n            ": types.EventByIdDocument,
     "\n    mutation AcceptApplicant($input:MutationAcceptApplicantInput!) {\n        acceptApplicant(input:$input)\n     }\n": types.AcceptApplicantDocument,
+    "\n    mutation DeleteEventInEditCreatedEvent($id: mongoId!) {\n        deleteEvent(id:$id)\n      }\n": types.DeleteEventInEditCreatedEventDocument,
     "\nquery UserByIdProfile {\n      userById{\n            name\n            email\n            availableWeights\n            createdEvents {\n                createdEventId\n                eventName\n                createdEventDescription\n                createdEventDate\n                createdEventWeights{\n                    weight\n                    filled\n                }\n            }\n            signedUpEvents {\n                accepted\n                eventName\n                signedUpEventDate\n                signedUpEventId\n        }\n        }\n    }\n": types.UserByIdProfileDocument,
     "\nquery UserByIdSettings {\n      userById{\n            name\n            email\n            availableWeights\n        }\n    }    \n": types.UserByIdSettingsDocument,
     "\nmutation UpdateUserSettings($input: MutationUpdateUserSettingsInput!){\n  updateUserSettings(input:$input){\n    name\n    email\n    availableWeights\n  }\n}\n": types.UpdateUserSettingsDocument,
@@ -78,6 +79,10 @@ export function gql(source: "\n    query EventById($id: mongoId!) {\n        eve
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n    mutation AcceptApplicant($input:MutationAcceptApplicantInput!) {\n        acceptApplicant(input:$input)\n     }\n"): (typeof documents)["\n    mutation AcceptApplicant($input:MutationAcceptApplicantInput!) {\n        acceptApplicant(input:$input)\n     }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation DeleteEventInEditCreatedEvent($id: mongoId!) {\n        deleteEvent(id:$id)\n      }\n"): (typeof documents)["\n    mutation DeleteEventInEditCreatedEvent($id: mongoId!) {\n        deleteEvent(id:$id)\n      }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

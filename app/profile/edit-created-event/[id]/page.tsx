@@ -56,6 +56,12 @@ const ACCEPT_OR_REJECT_APPLICANT_MUTATION = gql(`
      }
 `);
 
+const DELETE_EVENT_MUTATION = gql(`
+    mutation DeleteEventInEditCreatedEvent($id: mongoId!) {
+        deleteEvent(id:$id)
+      }
+`);
+
 const CreatedEventEdit: React.FC<Props> = ({ params }) => {
   const { loading, error, data } = useQuery(CREATED_EVENT_QUERY, {
     variables: {
@@ -133,8 +139,17 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
           id: params.id,
         },
       },
-      'EventById'
+      "EventById",
     ],
+  });
+
+  const [
+    deleteEventMutation,
+    { data: deleteEventMutationData, error: deleteEventMutationError },
+  ] = useMutation(DELETE_EVENT_MUTATION, {
+    onCompleted: () => {
+      Router.push("/events");
+    },
   });
 
   let acceptOrRejectApplicantClick = async (
@@ -249,9 +264,9 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
                     <p className="my-1 text-xl">No weights added</p>
                   )}
                 </div>
-                {/* @ts-ignore not sure about this one... */}
                 {data?.eventById?.weights ? (
                   <p className="my-1 text-xl ">
+                    {/* @ts-ignore not sure about this one... */}
                     {data.eventById.weights.weight}
                   </p>
                 ) : (
@@ -282,6 +297,20 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
     } else if (edit && edit != "applicant") {
       return (
         <div className="relative myContainer">
+          <button
+            onClick={() => {
+              if (
+                window.confirm("Are you sure you want to delete this event?")
+              ) {
+                deleteEventMutation({ variables: { id: params.id } });
+              }
+            }}
+            className="absolute top-0 left-3 flex p-2 text-xs text-white rounded-lg bg-black hover:bg-gray-700 hover:cursor-pointer myFocus:ring-4 ring-grey-300"
+          >
+            <span className="mr-1 ">Delete</span>
+            <AiOutlineRollback />{" "}
+          </button>
+
           <h2 className="my-4 text-3xl text-center">Edit Event</h2>
           <p className="my-4 text-sm text-center lg:text-base">
             <em>
@@ -384,7 +413,7 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
                   type="submit"
                   className="w-3/4 m-2 text-lg border-2 rounded-sm shadow-md bg-gradient-to-b from-myGreen to-green-300 border-myDarkGreen hover:ring-2 hover:ring-myLightBlue "
                 >
-                  Create Event
+                  Update Event
                 </button>
               </div>
             </form>
