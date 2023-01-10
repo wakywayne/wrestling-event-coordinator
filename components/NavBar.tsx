@@ -18,7 +18,7 @@ const NavBar: React.FC<Props> = () => {
                             Home
                         </Link>
                         <Link href="/events" className="block mr-4 text-white hover:text-myLightBlue lg:inline-block lg:mt-0">
-                            Find Events
+                            Events
                         </Link>
                         <Link href="/profile" className="block text-white hover:text-myLightBlue lg:inline-block lg:mt-0">
                             Profile

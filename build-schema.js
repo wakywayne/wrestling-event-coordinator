@@ -1,0 +1,1 @@
+module.exports = require('@boost/module').requireModule(require.resolve('./pages/api/index.ts'));

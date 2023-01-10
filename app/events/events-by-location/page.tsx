@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { gql } from '@/src/__generated__';
 import { Event as EventType } from '@/gql/index';
-import LoadingEvents from '@/components/LoadingEvents';
+// import LoadingEvents from '@/components/LoadingEvents';
+// We might not need this in this component
 import Link from 'next/link';
 
 interface Props {
@@ -46,7 +47,7 @@ const EventsByLocation: React.FC<Props> = () => {
     const [coordinates, setCoordinates] = useState<number[] | undefined>(undefined);
     const [eventsSortedByCoordinates, setEventsSortedByCoordinates] = useState<EventType[] | undefined>(undefined);
 
-    const { error, data } = useQuery(GET_EVENTS);
+    const { data } = useQuery(GET_EVENTS);
     const [getEventsByLocation,] = useLazyQuery(GET_EVENTS_BY_DISTANCE, {
         onCompleted: (data) => {
             if (data.eventsByDistance) {

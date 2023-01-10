@@ -127,7 +127,7 @@ const SingleEventPage: React.FC<Props> = ({ params }) => {
                         <p className='my-1 text-xl'>Info: {event.description}</p>
                         {event.date && <p className='my-1 text-xl'>Date: {String(event.date)}</p>}
                         {event.cost && <p className='my-1 text-xl'>Cost: {event.cost}</p>}
-                        {event.link && < a href={`${event.link}`} className='my-1 text-xl underline text-myLightBlue'>More Info</a>}
+                        {event.link && < a href={`${event.link}`} target="_blank" className='my-1 text-xl underline text-myLightBlue'>More Info</a>}
                     </div>
                 </div>
             </div>

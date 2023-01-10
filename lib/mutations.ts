@@ -481,20 +481,38 @@ const acceptOrRemoveApplicant = async (
 
       if (query.modifiedCount > 0) {
         // change to query.modifiedCount
+      const newclient = await clientPromise;
+      const db = newclient.db();
 
-        const deletequery = await db.collection("events").updateOne(
-          {
-            _id: new ObjectId(eventId),
-            createdBy: new ObjectId(createdBy),
-          },
-          { $pull: { eventApplicants: { userId: new ObjectId(applicantId) } } }
-        );
 
-        const trueOrFalse = deletequery.modifiedCount > 0 ? true : false;
-        return trueOrFalse;
+        const applicantAcceptedQuery = await Promise.all([
+         db.collection("events").updateOne(
+            {
+              _id: new ObjectId(eventId),
+              createdBy: new ObjectId(createdBy),
+            },
+            {
+              $pull: { eventApplicants: { userId: new ObjectId(applicantId) } },
+            }
+          ),
+        db.collection("users").updateOne(
+              { _id: new ObjectId(applicantId) },
+              { $set: { "signedUpEvents.$[el].accepted": true } },
+              { arrayFilters: [{ "el.eventId": new ObjectId(eventId) }] }
+            )
+        ]);
+
+        // const trueOrFalse = applicantAcceptedQuery.modifiedCount > 0 ? true : false;
+        console.log({applicantAcceptedQuery});
+
+      if(applicantAcceptedQuery[0].modifiedCount > 0 && applicantAcceptedQuery[1].modifiedCount > 0){
+        return true;
+      } else {
+        return false
+        }
 
       } else {
-        throw new Error("User not added to event");
+        throw new Error("User not added to event in applicant accepted query");
       }
     } catch (e) {
       console.error(e);
