@@ -224,8 +224,13 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
                   Event Link
                 </a>
                 <div className="flex items-center">
-                  <p className="my-1 mr-1 text-xl">Has Applicants: </p>
-                  {applicantsExist ? <AiOutlineCheck /> : <FiX />}
+                  {applicantsExist ? <button
+            onClick={() => setEdit("applicant")}
+            className="flex p-2 text-xs text-white rounded-lg  bg-myGreen hover:bg-green-700 hover:cursor-pointer myFocus:ring-4 ring-green-500"
+          >
+            <span className="mr-1 ">View Applicants</span> <BsPencilSquare />
+          </button>  : <span className="mr-1 ">No Applicants</span> }
+          
                 </div>
                 <div className="flex flex-col items-center w-full ">
                   <h6 className="mx-auto text-xl ">Weight Spots</h6>
@@ -285,12 +290,6 @@ const CreatedEventEdit: React.FC<Props> = ({ params }) => {
             className="absolute top-0 flex p-2 text-xs text-white rounded-lg bg-myRed hover:bg-red-700 right-3 hover:cursor-pointer myFocus:ring-4 ring-red-300"
           >
             <span className="mr-1 ">Edit</span> <BsPencilSquare />
-          </button>
-          <button
-            onClick={() => setEdit("applicant")}
-            className="absolute flex p-2 text-xs text-white rounded-lg top-10 bg-myGreen hover:bg-green-700 right-3 hover:cursor-pointer myFocus:ring-4 ring-green-500"
-          >
-            <span className="mr-1 ">View Applicants</span> <BsPencilSquare />
           </button>
         </div>
       );
